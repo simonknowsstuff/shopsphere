@@ -2,6 +2,7 @@ package com.groupthree.shopsphere.model;
 // Table for users with required fields, not implemented yet.
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Table("users")
 public class User {
@@ -10,8 +11,16 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
+    private String password;
 
-    public User(String firstName, String lastName, String email) {}
+    public User() {} // No args constructor
+
+    public User(String firstName, String lastName, String email, String password) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+    }
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -32,5 +41,18 @@ public class User {
     }
     public String getEmail() {
         return email;
+    }
+
+    public void setPassword(String password) {
+        // Only hash if password is not hashed:
+        if (!password.startsWith("$2a$")) {
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            this.password = passwordEncoder.encode(password);
+        } else {
+            this.password = password;
+        }
+    }
+    public String getPassword() {
+        return password;
     }
 }
