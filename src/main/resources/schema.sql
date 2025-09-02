@@ -1,9 +1,9 @@
-CREATE TABLE users (
+CREATE TABLE USERS (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                       FIRST_NAME VARCHAR(255),
-                       LAST_NAME VARCHAR(255),
-                       EMAIL VARCHAR(255),
-                       PASSWORD VARCHAR(255)
+                       first_name VARCHAR(255),
+                       last_name VARCHAR(255),
+                       email VARCHAR(255),
+                       password VARCHAR(255)
 );
 
 CREATE TABLE products (
@@ -18,4 +18,14 @@ CREATE TABLE products (
                           review_count INT,
                           in_stock BOOLEAN,
                           features VARCHAR(1000)
+);
+
+CREATE TABLE cart (
+                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       user_id BIGINT NOT NULL,
+                       product_id BIGINT NOT NULL,
+                       quantity INT DEFAULT 1,
+
+                       CONSTRAINT fk_cart_user FOREIGN KEY (user_id) REFERENCES users(id),
+                       CONSTRAINT fk_cart_product FOREIGN KEY (product_id) REFERENCES products(id)
 );

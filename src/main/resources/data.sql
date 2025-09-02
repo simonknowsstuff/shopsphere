@@ -1,7 +1,12 @@
-INSERT INTO users (first_name, last_name, status, password) VALUES ('John', 'Doe', 'john@example.com', 'hashedpassword');
+INSERT INTO users (first_name, last_name, email, password)
+VALUES ('John', 'Doe', 'john@example.com', 'password123'),
+       ('Jane', 'Smith', 'jane@example.com', 'password456');
+
 INSERT INTO products (name, price, original_price, description, category, image, rating, review_count, in_stock, features)
-VALUES
-    ('Smartphone X10', 699.99, 899.99, 'Latest smartphone with high-end features', 'Electronics', 'image1.jpg', 4.5, 120, true, '5G,128GB Storage,6GB RAM'),
-    ('Gaming Laptop Z', 1499.99, 1799.99, 'Powerful gaming laptop with RTX GPU', 'Computers', 'image2.jpg', 4.8, 85, true, '16GB RAM,RTX 3060,1TB SSD'),
-    ('Wireless Earbuds Pro', 129.99, 159.99, 'Noise-cancelling wireless earbuds with long battery life', 'Accessories', 'image3.jpg', 4.3, 200, true, 'Bluetooth 5.0,Noise Cancellation,Water Resistant'),
-    ('Wireless Headphones', 199.99, 249.99, 'Premium headphones...', 'Electronics', 'image_url', 4.8, 324, TRUE, 'Noise Cancellation,30-hour Battery');
+VALUES ('Laptop', 750.00, 1000.00, 'Gaming laptop', 'Electronics', 'laptop.png', 4.5, 120, TRUE, '16GB RAM, 512GB SSD'),
+       ('Headphones', 50.00, 80.00, 'Wireless headphones', 'Electronics', 'headphones.png', 4.2, 85, TRUE, 'Noise cancelling');
+
+INSERT INTO cart (user_id, product_id, quantity)
+VALUES (1, 1, 1),  -- John has 1 Laptop
+       (1, 2, 2),  -- John has 2 Headphones
+       (2, 2, 1);  -- Jane has 1 Headphone

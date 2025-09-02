@@ -44,13 +44,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        // Only hash if password is not hashed:
-        if (!password.startsWith("$2a$")) {
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            this.password = passwordEncoder.encode(password);
-        } else {
             this.password = password;
-        }
     }
     public String getPassword() {
         return password;

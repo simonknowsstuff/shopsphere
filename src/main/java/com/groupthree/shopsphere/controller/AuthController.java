@@ -2,7 +2,7 @@ package com.groupthree.shopsphere.controller;
 import com.groupthree.shopsphere.dto.requests.LoginRequest;
 import com.groupthree.shopsphere.dto.requests.RegisterRequest;
 import com.groupthree.shopsphere.dto.responses.AuthResponse;
-import com.groupthree.shopsphere.models.Product;
+
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @RequestMapping("/auth")
 public class AuthController {
     private final UserRepository repo;
-    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    BCryptPasswordEncoder passwordEncoder;
 
     public AuthController(UserRepository repo) {
         this.repo=repo;
