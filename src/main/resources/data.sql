@@ -1,4 +1,5 @@
-INSERT INTO users (first_name, last_name, status, password) VALUES ('John', 'Doe', 'john@example.com', 'hashedpassword');
+INSERT INTO users (first_name, last_name, email, password)
+VALUES ('John', 'Doe', 'john@example.com', 'hashedpassword');
 INSERT INTO products (name, price, original_price, description, category, image, rating, review_count, in_stock, features)
 VALUES
     ('Smartphone X10', 699.99, 899.99, 'Latest smartphone with high-end features', 'Electronics', 'image1.jpg', 4.5, 120, true, '5G,128GB Storage,6GB RAM'),

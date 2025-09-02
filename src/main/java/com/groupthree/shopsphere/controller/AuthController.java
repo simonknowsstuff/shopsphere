@@ -1,12 +1,15 @@
 package com.groupthree.shopsphere.controller;
+
 import com.groupthree.shopsphere.dto.requests.LoginRequest;
 import com.groupthree.shopsphere.dto.requests.RegisterRequest;
 import com.groupthree.shopsphere.dto.responses.AuthResponse;
-import com.groupthree.shopsphere.models.Product;
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.UserRepository;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,10 +19,11 @@ public class AuthController {
 
     public AuthController(UserRepository repo) {
         this.repo=repo;
-        this.passwordEncoder = new BCryptPasswordEncoder();}
+        this.passwordEncoder = new BCryptPasswordEncoder();
+    }
 
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest request){
+    public AuthResponse register(@RequestBody RegisterRequest request) {
         if (repo.findByEmail(request.getEmail())!=null){
             return new AuthResponse("error","email already exists");
         }
