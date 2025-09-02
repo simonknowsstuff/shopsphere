@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@Table("users")
+@Table("USERS")
 public class User {
     @Id
     private Long id;

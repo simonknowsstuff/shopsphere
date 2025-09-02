@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-@Table("products")
+@Table("PRODUCTS")
 public class Product {
     @Id
     private Long id;
