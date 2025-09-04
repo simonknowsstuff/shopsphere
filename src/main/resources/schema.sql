@@ -1,9 +1,10 @@
-CREATE TABLE USERS (
+CREATE TABLE users (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
                        first_name VARCHAR(255),
                        last_name VARCHAR(255),
-                       email VARCHAR(255),
-                       password VARCHAR(255)
+                       email VARCHAR(255) UNIQUE,
+                       password VARCHAR(255),
+                       role VARCHAR(50) NOT NULL -- "CUSTOMER" or "VENDOR"
 );
 
 CREATE TABLE products (
@@ -17,8 +18,11 @@ CREATE TABLE products (
                           rating DOUBLE,
                           review_count INT,
                           in_stock BOOLEAN,
-                          features VARCHAR(1000)
+                          features VARCHAR(1000),
+                          vendor_id BIGINT, -- foreign key to users (vendors)
+                          CONSTRAINT fk_vendor FOREIGN KEY (vendor_id) REFERENCES users(id)
 );
+
 
 CREATE TABLE cart (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,

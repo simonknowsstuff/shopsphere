@@ -1,15 +1,17 @@
 package com.groupthree.shopsphere.dto.responses;
 
 public class AuthResponse {
-    public String status;
+    private String status;
     private String message;
+    private String role;
 
     public AuthResponse() {
     }
 
-    public AuthResponse(String status, String message) {
+    public AuthResponse(String status, String message, String role) {
         this.message = message;
         this.status = status;
+        this.role = role;
     }
 
     public String getMessage() {
@@ -28,4 +30,10 @@ public class AuthResponse {
         this.status = status;
     }
 
+    public String getRole() {
+        return role;
+    }
+    public void setRole(String role) {
+        this.role = role;
+    }
 }

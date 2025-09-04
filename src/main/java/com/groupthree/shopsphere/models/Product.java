@@ -20,6 +20,7 @@ public class Product {
     private int reviewCount;
     private boolean inStock;
     private String features;
+    private Long vendorId;
 
     public Product() {}
 
@@ -34,7 +35,8 @@ public class Product {
      double rating,
      int reviewCount,
      boolean inStock,
-     List<String> features){
+     List<String> features,
+     Long vendorId){
         this.id = id;
         this.name = name;
         this.price = price;
@@ -46,6 +48,7 @@ public class Product {
         this.reviewCount = reviewCount;
         this.inStock = inStock;
         this.features = String.join(",", features);
+        this.vendorId = vendorId;
     }
 
     public Long getId() {
@@ -111,7 +114,7 @@ public class Product {
         this.reviewCount = reviewCount;
     }
 
-    public boolean isInStock() {
+    public boolean getInStock() {
         return inStock;
     }
     public void setInStock(boolean inStock) {
@@ -123,5 +126,12 @@ public class Product {
     }
     public void setFeatures(List<String> features) {
         this.features = String.join(",", features);
+    }
+
+    public Long getVendorId() {
+        return vendorId;
+    }
+    public void setVendorId(Long vendorId) {
+        this.vendorId = vendorId;
     }
 }

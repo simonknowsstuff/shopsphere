@@ -21,7 +21,7 @@ public class AuthController {
     @PostMapping("/register")
     public AuthResponse register(@RequestBody RegisterRequest request){
         if (repo.findByEmail(request.getEmail())!=null){
-            return new AuthResponse("error","email already exists");
+            return new AuthResponse("error","email already exists",null);
         }
         User user=new User();
         user.setFirstName(request.getFirstName());
@@ -30,16 +30,35 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         repo.save(user);
-        return new AuthResponse("success","Registered");
+        return new AuthResponse("success","Registered","Customer");
+    }
+
+    @PostMapping("/register/{id}")
+    public AuthResponse vendorRegister(@RequestBody RegisterRequest request, @PathVariable Long id){
+        if (repo.findByEmail(request.getEmail())!=null){
+            return new AuthResponse("error","email already exists",null);
+        }
+        User check= repo.findById(id).orElseThrow();
+        if(!check.getRole().equals("Admin")){
+            return new AuthResponse("error","Not an admin",null);
+        }
+        User user=new User();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole("Vendor");
+        repo.save(user);
+        return new AuthResponse("success","Registered","Vendor");
     }
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request){
         User user=repo.findByEmail(request.getEmail());
         if (user==null||!passwordEncoder.matches(request.getPassword(),user.getPassword())){
-            return new AuthResponse("error","Invalid email or password");
+            return new AuthResponse("error","Invalid email or password",null);
         }
-        return new AuthResponse("success","Logged in");
+        return new AuthResponse("success","Logged in",user.getRole());
     }
 
 }

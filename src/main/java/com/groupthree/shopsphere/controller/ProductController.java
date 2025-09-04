@@ -31,13 +31,4 @@ public class ProductController {
         return repo.findById(id).orElseThrow();
     }
 
-    @PostMapping
-    public Product createProduct(@RequestBody Product product) {
-        return repo.save(product);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
-        repo.deleteById(id);
-    }
 }
