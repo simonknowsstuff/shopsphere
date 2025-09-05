@@ -33,15 +33,12 @@ public class AuthController {
         return new AuthResponse("success","Registered","Customer");
     }
 
-    @PostMapping("/register/{id}")
-    public AuthResponse vendorRegister(@RequestBody RegisterRequest request, @PathVariable Long id){
+    @PostMapping("/register/vendor")
+    public AuthResponse vendorRegister(@RequestBody RegisterRequest request){
         if (repo.findByEmail(request.getEmail())!=null){
             return new AuthResponse("error","email already exists",null);
         }
-        User check= repo.findById(id).orElseThrow();
-        if(!check.getRole().equals("Admin")){
-            return new AuthResponse("error","Not an admin",null);
-        }
+
         User user=new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
