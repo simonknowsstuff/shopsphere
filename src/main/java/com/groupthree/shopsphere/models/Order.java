@@ -15,12 +15,12 @@ public class Order {
     private String status;
 
     public Order(){}
-    public Order(Long id, Long userId, LocalDateTime orderDate, BigDecimal totalAmount, String status){
-        this.id = id;
+
+    public Order(Long userId, BigDecimal total, String pending) {
         this.userId = userId;
-        this.orderDate = orderDate;
-        this.totalAmount = totalAmount;
-        this.status = status;
+        this.totalAmount = total;
+        this.status = pending;
+        this.orderDate = LocalDateTime.now();
     }
 
     // Getters and Setters
