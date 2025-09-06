@@ -1,7 +1,6 @@
 package com.groupthree.shopsphere.controller;
 import com.groupthree.shopsphere.models.Product;
 import com.groupthree.shopsphere.repository.ProductRepository;
-import org.springframework.data.annotation.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
