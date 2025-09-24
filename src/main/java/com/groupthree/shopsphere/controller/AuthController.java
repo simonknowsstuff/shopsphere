@@ -16,7 +16,8 @@ public class AuthController {
 
     public AuthController(UserRepository repo) {
         this.repo=repo;
-        this.passwordEncoder = new BCryptPasswordEncoder();}
+        this.passwordEncoder = new BCryptPasswordEncoder();
+    }
 
     @PostMapping("/register")
     public AuthResponse register(@RequestBody RegisterRequest request){
@@ -39,7 +40,7 @@ public class AuthController {
             return new AuthResponse("error","email already exists",null);
         }
 
-        User user=new User();
+        User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
@@ -51,8 +52,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request){
-        User user=repo.findByEmail(request.getEmail());
-        if (user==null||!passwordEncoder.matches(request.getPassword(),user.getPassword())){
+        User user = repo.findByEmail(request.getEmail());
+        if (user == null||!passwordEncoder.matches(request.getPassword(),user.getPassword())){
             return new AuthResponse("error","Invalid email or password",null);
         }
         return new AuthResponse("success","Logged in",user.getRole());

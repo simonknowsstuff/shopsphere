@@ -2,7 +2,6 @@ package com.groupthree.shopsphere.models;
 // Table for users with required fields, not implemented yet.
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Table("USERS")
 public class User {
