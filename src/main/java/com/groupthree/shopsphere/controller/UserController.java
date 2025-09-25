@@ -1,5 +1,4 @@
 package com.groupthree.shopsphere.controller;
-// Rest Controller for users.
 
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.UserRepository;
