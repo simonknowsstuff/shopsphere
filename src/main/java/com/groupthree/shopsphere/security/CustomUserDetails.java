@@ -16,17 +16,22 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return Collections.singletonList(new SimpleGrantedAuthority(user.getRole()));
+		if (user == null || user.getRole() == null) {
+			return Collections.emptyList();
+		}
+		return user.getRole().stream()
+			.map(role -> new SimpleGrantedAuthority(role))
+			.toList();
 	}
 
 	@Override
 	public String getPassword() {
-		return user.getPassword();
+		return user != null ? user.getPassword() : null;
 	}
 
 	@Override
 	public String getUsername() {
-		return user.getEmail();
+		return user != null ? user.getEmail() : null;
 	}
 
 	@Override
