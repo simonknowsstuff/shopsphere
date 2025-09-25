@@ -1,14 +1,14 @@
 package com.groupthree.shopsphere.dto.responses;
-
+import java.util.Set;
 public class AuthResponse {
     private String status;
     private String message;
-    private String role;
+    private Set<String> role;
 
     public AuthResponse() {
     }
 
-    public AuthResponse(String status, String message, String role) {
+    public AuthResponse(String status, String message, Set<String> role) {
         this.message = message;
         this.status = status;
         this.role = role;
@@ -30,10 +30,10 @@ public class AuthResponse {
         this.status = status;
     }
 
-    public String getRole() {
+    public Set<String> getRole() {
         return role;
     }
-    public void setRole(String role) {
+    public void setRole(Set<String> role) {
         this.role = role;
     }
 }

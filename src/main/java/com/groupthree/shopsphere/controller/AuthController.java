@@ -8,6 +8,9 @@ import com.groupthree.shopsphere.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -30,7 +33,9 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         repo.save(user);
-        return new AuthResponse("success","Registered","Customer");
+        Set<String> roles=new HashSet<>();
+        roles.add("Customer");
+        return new AuthResponse("success","Registered",roles);
     }
 
     @PostMapping("/register/vendor")
@@ -44,9 +49,13 @@ public class AuthController {
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("Vendor");
+
+        Set<String> roles=new HashSet<>();
+        roles.add("customer");
+        roles.add("Vendor");
+        user.setRole(roles);
         repo.save(user);
-        return new AuthResponse("success","Registered","Vendor");
+        return new AuthResponse("success","Registered",roles);
     }
 
     @PostMapping("/login")
