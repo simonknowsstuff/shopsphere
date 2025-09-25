@@ -1,7 +1,9 @@
 package com.groupthree.shopsphere.models;
-// Table for users with required fields, not implemented yet.
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Table("USERS")
 public class User {
@@ -11,9 +13,11 @@ public class User {
     private String lastName;
     private String email;
     private String password;
-    private String role="Customer";
+    private String role;
 
-    public User() {} // No args constructor
+    public User() {
+        this.role="Customer";
+    }
 
     public User(String firstName, String lastName, String email, String password, String role) {
         this.firstName = firstName;
@@ -51,10 +55,17 @@ public class User {
         return password;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setRole(Set<String> role) {
+        this.role = String.join(",", role);
     }
-    public String getRole() {
-        return role;
+    public Set<String> getRole() {
+        if(role==null||role.isEmpty()){
+            return new HashSet<>();
+        }
+        Set<String> roles=new HashSet<>();
+        for(String s:role.split(",")){
+            roles.add(s.trim().toUpperCase());
+        }
+        return roles;
     }
 }
