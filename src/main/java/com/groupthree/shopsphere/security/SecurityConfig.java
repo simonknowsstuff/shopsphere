@@ -33,8 +33,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Restricting authority here:
                 .requestMatchers("/auth/**", "/products/**", "/h2-console/**").permitAll()
-                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/cart/**", "/order/**").hasAuthority("CUSTOMER")
                 .requestMatchers("/vendor/**").hasAuthority("VENDOR")
+                .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // For H2 Console

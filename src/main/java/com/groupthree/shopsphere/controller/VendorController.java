@@ -23,6 +23,10 @@ public class VendorController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userRepository.findByEmail(email);
+        // Ensure user has VENDOR authority
+        if (!user.getRole().contains("VENDOR")) {
+            throw new RuntimeException("User does not have VENDOR authority");
+        }
         return user.getId();
     }
 
@@ -52,8 +56,8 @@ public class VendorController {
         prod.setInStock(product.getInStock());
         prod.setReviewCount(product.getReviewCount());
         return productRepo.save(prod);
-
     }
+    
     @DeleteMapping("/delete/{productId}")
     public void deleteProduct(@PathVariable Long productId) {
         Long vendorId = getVendorIdFromToken();

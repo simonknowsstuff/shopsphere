@@ -36,17 +36,18 @@ public class AuthController {
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        repo.save(user);
+        // Grant CUSTOMER authority
         Set<String> roles=new HashSet<>();
         roles.add("CUSTOMER");
+        user.setRole(roles);
+        repo.save(user);
         return new AuthResponse("success","Registered",roles,null);
     }
 
     @PostMapping("/register/vendor")
     public AuthResponse vendorRegister(@RequestBody RegisterRequest request){
         if (repo.findByEmail(request.getEmail())!=null){
-            return new AuthResponse("error","email already exists",null,null);
+            return new AuthResponse("error","Email already exists",null,null);
         }
 
         User user = new User();
