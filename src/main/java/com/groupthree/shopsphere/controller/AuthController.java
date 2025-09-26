@@ -7,6 +7,7 @@ import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.UserRepository;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.groupthree.shopsphere.security.JwtUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,15 +18,18 @@ public class AuthController {
     private final UserRepository repo;
     BCryptPasswordEncoder passwordEncoder;
 
-    public AuthController(UserRepository repo) {
-        this.repo=repo;
+    private final JwtUtil jwtUtil;
+
+    public AuthController(UserRepository repo, JwtUtil jwtUtil) {
+        this.repo = repo;
+        this.jwtUtil = jwtUtil;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     @PostMapping("/register")
     public AuthResponse register(@RequestBody RegisterRequest request){
         if (repo.findByEmail(request.getEmail())!=null){
-            return new AuthResponse("error","email already exists",null);
+            return new AuthResponse("error","email already exists",null,null);
         }
         User user=new User();
         user.setFirstName(request.getFirstName());
@@ -35,14 +39,14 @@ public class AuthController {
 
         repo.save(user);
         Set<String> roles=new HashSet<>();
-        roles.add("Customer");
-        return new AuthResponse("success","Registered",roles);
+        roles.add("CUSTOMER");
+        return new AuthResponse("success","Registered",roles,null);
     }
 
     @PostMapping("/register/vendor")
     public AuthResponse vendorRegister(@RequestBody RegisterRequest request){
         if (repo.findByEmail(request.getEmail())!=null){
-            return new AuthResponse("error","email already exists",null);
+            return new AuthResponse("error","email already exists",null,null);
         }
 
         User user = new User();
@@ -52,20 +56,20 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         Set<String> roles=new HashSet<>();
-        roles.add("customer");
-        roles.add("Vendor");
+        roles.add("CUSTOMER");
+        roles.add("VENDOR");
         user.setRole(roles);
         repo.save(user);
-        return new AuthResponse("success","Registered",roles);
+        return new AuthResponse("success","Registered",roles,null);
     }
 
     @PostMapping("/login")
     public AuthResponse login(@RequestBody LoginRequest request){
         User user = repo.findByEmail(request.getEmail());
         if (user == null||!passwordEncoder.matches(request.getPassword(),user.getPassword())){
-            return new AuthResponse("error","Invalid email or password",null);
+            return new AuthResponse("error","Invalid email or password",null,null);
         }
-        return new AuthResponse("success","Logged in",user.getRole());
+        String token = jwtUtil.generateToken(user.getEmail());
+        return new AuthResponse("success","Logged in",user.getRole(),token);
     }
-
 }
