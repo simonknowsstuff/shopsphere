@@ -1,8 +1,8 @@
 -- Users
 INSERT INTO users (first_name, last_name, email, password, role) VALUES
-('John', 'Doe', 'john@example.com', '$2a$10$hashedpassword1', 'CUSTOMER'),
+('John', 'Doe', 'john@example.com', '$2a$10$hashedpassword1', 'CUSTOMER,VENDOR'),
 ('Alice', 'Smith', 'alice@example.com', '$2a$10$hashedpassword2', 'CUSTOMER'),
-('Vendor', 'One', 'vendor1@example.com', '$2a$10$hashedpassword3', 'VENDOR');
+('Vendor', 'One', 'vendor1@example.com', '$2a$10$hashedpassword3', 'CUSTOMER,VENDOR');
 
 -- Products
 INSERT INTO products (name, price, original_price, description, category, image, rating, review_count, in_stock, features, vendor_id) VALUES
