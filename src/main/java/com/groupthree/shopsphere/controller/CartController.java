@@ -8,6 +8,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/cart")
 public class CartController {
@@ -41,14 +43,16 @@ public class CartController {
     @PutMapping("/")
     public Cart updateQuantity(@RequestBody Cart cart){
         Long id = getUserIdFromToken();
-        Cart existing=repo.findById(id).orElseThrow();
+        Cart existing=repo.findByUserIdAndProductId(id,cart.getProductId()).orElseThrow();
         existing.setQuantity(cart.getQuantity());
         return repo.save(existing);
     }
 
     @DeleteMapping("/")
-    public void delete() {
+    public void delete(@RequestBody Map<String,Long> body) {
         Long id = getUserIdFromToken();
-        repo.deleteById(id);
+        Long productId = body.get("productId");
+        Cart cur=repo.findByUserIdAndProductId(id,productId).orElseThrow();
+        repo.delete(cur);
     }
 }
