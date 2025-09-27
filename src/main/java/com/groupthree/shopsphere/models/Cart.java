@@ -1,13 +1,22 @@
 package com.groupthree.shopsphere.models;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 @Table("CART")
 public class Cart {
     @Id
     private Long id;
     private Long userId;
+    
+    @NotNull
     private Long productId;
+    
+    @NotNull
+    @Min(1)
     private Integer quantity;
 
     public Cart(){}
@@ -19,6 +28,7 @@ public class Cart {
         this.quantity = quantity;
     }
 
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -39,7 +49,7 @@ public class Cart {
     public void setProductId(Long productId) {
         this.productId = productId;
     }
-    
+
     public Integer getQuantity() {
         return quantity;
     }

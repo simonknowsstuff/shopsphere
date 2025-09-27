@@ -5,6 +5,8 @@ import com.groupthree.shopsphere.repository.ProductRepository;
 import com.groupthree.shopsphere.repository.UserRepository;
 import com.groupthree.shopsphere.models.User;
 
+import jakarta.validation.Valid;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +17,7 @@ public class VendorController {
     private final ProductRepository productRepo;
     private final UserRepository userRepository;
 
-    public VendorController( ProductRepository productRepo, UserRepository userRepository) {
+    public VendorController(ProductRepository productRepo, UserRepository userRepository) {
         this.productRepo = productRepo;
         this.userRepository = userRepository;
     }
@@ -38,14 +40,14 @@ public class VendorController {
     }
 
     @PostMapping("/add")
-    public Product addProduct(@RequestBody Product product) {
+    public Product addProduct(@Valid @RequestBody Product product) {
         Long vendorId = getVendorIdFromToken();
         product.setVendorId(vendorId);
         return productRepo.save(product);
     }
 
     @PutMapping("/products/{productId}")
-    public Product updateProduct(@PathVariable Long productId, @RequestBody Product product) {
+    public Product updateProduct(@PathVariable Long productId, @Valid @RequestBody Product product) {
         Long vendorId = getVendorIdFromToken();
         Product prod = productRepo.findById(productId).orElseThrow();
         if (!prod.getVendorId().equals(vendorId)) {

@@ -5,13 +5,27 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PastOrPresent;
+
 @Table("ORDERS")
 public class Order {
     @Id
     private Long id;
+
+    @NotNull
     private Long userId;
+    
+    @NotNull
+    @PastOrPresent
     private LocalDateTime orderDate;
+    
+    @NotNull
+    @Min(0)
     private BigDecimal totalAmount;
+
+    @NotNull
     private String status;
 
     public Order(){}

@@ -5,6 +5,8 @@ import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.CartRepository;
 import com.groupthree.shopsphere.repository.UserRepository;
 
+import jakarta.validation.Valid;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -39,14 +41,14 @@ public class CartController {
     }
 
     @PostMapping("/")
-    public Cart save(@RequestBody Cart cart) {
+    public Cart save(@Valid @RequestBody Cart cart) {
         Long userId = getUserIdFromToken();
         cart.setUserId(userId);
         return repo.save(cart);
     }
 
     @PutMapping("/")
-    public Cart updateQuantity(@RequestBody Cart cart){
+    public Cart updateQuantity(@Valid @RequestBody Cart cart){
         Long userId = getUserIdFromToken();
         Cart existing = repo.findByUserIdAndProductId(userId, cart.getProductId()).orElseThrow();
         existing.setQuantity(cart.getQuantity());

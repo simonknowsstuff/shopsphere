@@ -2,6 +2,8 @@ package com.groupthree.shopsphere.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,14 +11,24 @@ import java.util.Set;
 public class User {
     @Id
     private Long id;
+
+    @NotNull
     private String firstName;
+
+    @NotNull
     private String lastName;
+    
+    @NotNull
     private String email;
+    
+    @NotNull
     private String password;
+    
+    @NotNull
     private String role;
 
     public User() {
-        this.role="Customer";
+        this.role = "CUSTOMER";
     }
 
     public User(Long id, String firstName, String lastName, String email, String password, String role) {
@@ -28,6 +40,7 @@ public class User {
         this.role = role;
     }
 
+    // Getters and setters
     public Long getId() {
         return id;
     }

@@ -7,6 +7,8 @@ import com.groupthree.shopsphere.repository.OrderItemRepository;
 import com.groupthree.shopsphere.repository.OrderRepository;
 import com.groupthree.shopsphere.repository.UserRepository;
 
+import jakarta.validation.Valid;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +40,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createOrder(@RequestBody List<OrderItem> items) {
+    public Order createOrder(@Valid @RequestBody List<OrderItem> items) {
         Long userId = getUserIdFromToken();
         BigDecimal total = items.stream()
                 .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))

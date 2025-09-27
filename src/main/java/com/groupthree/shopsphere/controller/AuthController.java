@@ -4,6 +4,9 @@ import com.groupthree.shopsphere.dto.requests.LoginRequest;
 import com.groupthree.shopsphere.dto.requests.RegisterRequest;
 import com.groupthree.shopsphere.dto.responses.AuthResponse;
 import com.groupthree.shopsphere.security.JwtUtil;
+
+import jakarta.validation.Valid;
+
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.UserRepository;
 
@@ -28,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest request){
+    public AuthResponse register(@Valid @RequestBody RegisterRequest request){
         if (repo.findByEmail(request.getEmail())!=null){
             return new AuthResponse("error","email already exists",null,null);
         }
@@ -46,7 +49,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/vendor")
-    public AuthResponse vendorRegister(@RequestBody RegisterRequest request){
+    public AuthResponse vendorRegister(@Valid @RequestBody RegisterRequest request){
         if (repo.findByEmail(request.getEmail())!=null){
             return new AuthResponse("error","Email already exists",null,null);
         }
@@ -66,7 +69,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request){
+    public AuthResponse login(@Valid @RequestBody LoginRequest request){
         User user = repo.findByEmail(request.getEmail());
         if (user == null||!passwordEncoder.matches(request.getPassword(),user.getPassword())){
             return new AuthResponse("error","Invalid email or password",null,null);

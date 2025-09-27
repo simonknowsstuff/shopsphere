@@ -4,13 +4,26 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+
 @Table("ORDER_ITEMS")
 public class OrderItem {
     @Id
     private Long id;
+
+    @NotNull
     private Long orderId;
+    
+    @NotNull
     private Long productId;
+    
+    @NotNull
+    @Min(0)
     private int quantity;
+    
+    @NotNull
+    @Min(1)
     private BigDecimal price;
 
     public OrderItem() {}

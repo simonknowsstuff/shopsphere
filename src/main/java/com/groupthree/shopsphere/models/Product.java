@@ -5,21 +5,41 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.util.Arrays;
 import java.util.List;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
 
 @Table("PRODUCTS")
 public class Product {
     @Id
     private Long id;
+
+    @NotNull
     private String name;
+
+    @NotNull
+    @Min(1)
     private double price;
+
+    @NotNull
+    @Min(1)
     private double originalPrice;
+
     private String description;
+    
+    @NotNull
     private String category;
+
     private String image;
+    
+    @Min(0)
     private double rating;
+
+    @Min(0)
     private int reviewCount;
     private boolean inStock;
     private String features;
+
+    @NotNull
     private Long vendorId;
 
     public Product() {}
@@ -51,6 +71,7 @@ public class Product {
         this.vendorId = vendorId;
     }
 
+    // Getters and setters
     public Long getId() {
         return id;
     }
