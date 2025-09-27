@@ -2,6 +2,7 @@ package com.groupthree.shopsphere.controller;
 
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.UserRepository;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController

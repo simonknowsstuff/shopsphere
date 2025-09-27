@@ -1,13 +1,14 @@
 package com.groupthree.shopsphere.controller;
+
 import com.groupthree.shopsphere.dto.requests.LoginRequest;
 import com.groupthree.shopsphere.dto.requests.RegisterRequest;
 import com.groupthree.shopsphere.dto.responses.AuthResponse;
-
+import com.groupthree.shopsphere.security.JwtUtil;
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.UserRepository;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import com.groupthree.shopsphere.security.JwtUtil;
 
 import java.util.HashSet;
 import java.util.Set;

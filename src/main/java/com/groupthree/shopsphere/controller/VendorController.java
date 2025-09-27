@@ -1,4 +1,5 @@
 package com.groupthree.shopsphere.controller;
+
 import com.groupthree.shopsphere.models.Product;
 import com.groupthree.shopsphere.repository.ProductRepository;
 import com.groupthree.shopsphere.repository.UserRepository;

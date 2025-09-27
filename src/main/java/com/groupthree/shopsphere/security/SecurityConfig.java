@@ -28,13 +28,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable()) // CSRF is not required for a JWT-based approach.
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Restricting authority here:
                 .requestMatchers("/auth/**", "/products/**", "/h2-console/**").permitAll()
-                .requestMatchers("/cart/**", "/orders/**").hasAuthority("CUSTOMER")
-                .requestMatchers("/vendor/**").hasAuthority("VENDOR")
+                .requestMatchers("/cart/**", "/orders/**").hasAnyAuthority("CUSTOMER", "VENDOR", "ADMIN")
+                .requestMatchers("/vendor/**").hasAnyAuthority("VENDOR", "ADMIN")
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
             )

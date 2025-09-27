@@ -1,10 +1,13 @@
 package com.groupthree.shopsphere.controller;
+
 import com.groupthree.shopsphere.models.Cart;
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.CartRepository;
 import com.groupthree.shopsphere.repository.UserRepository;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,28 +34,31 @@ public class CartController {
 
     @GetMapping("/")
     public Iterable<Cart> findAll() {
-        Long id = getUserIdFromToken();
-        return repo.findByUserId(id);
+        Long userId = getUserIdFromToken();
+        return repo.findByUserId(userId);
     }
 
-    @PostMapping
+    @PostMapping("/")
     public Cart save(@RequestBody Cart cart) {
+        Long userId = getUserIdFromToken();
+        cart.setUserId(userId);
         return repo.save(cart);
     }
 
     @PutMapping("/")
     public Cart updateQuantity(@RequestBody Cart cart){
-        Long id = getUserIdFromToken();
-        Cart existing=repo.findByUserIdAndProductId(id,cart.getProductId()).orElseThrow();
+        Long userId = getUserIdFromToken();
+        Cart existing = repo.findByUserIdAndProductId(userId, cart.getProductId()).orElseThrow();
         existing.setQuantity(cart.getQuantity());
         return repo.save(existing);
     }
 
     @DeleteMapping("/")
-    public void delete(@RequestBody Map<String,Long> body) {
-        Long id = getUserIdFromToken();
+    public ResponseEntity<String> delete(@RequestBody Map<String,Long> body) {
+        Long userId = getUserIdFromToken();
         Long productId = body.get("productId");
-        Cart cur=repo.findByUserIdAndProductId(id,productId).orElseThrow();
+        Cart cur = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
         repo.delete(cur);
+        return ResponseEntity.status(HttpStatus.OK).body("Item deleted from cart");
     }
 }

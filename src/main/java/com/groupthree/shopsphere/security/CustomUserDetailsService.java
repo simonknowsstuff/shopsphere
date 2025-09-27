@@ -2,6 +2,7 @@ package com.groupthree.shopsphere.security;
 
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.UserRepository;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
