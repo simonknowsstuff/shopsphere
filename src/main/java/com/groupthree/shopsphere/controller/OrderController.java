@@ -55,7 +55,7 @@ public class OrderController {
         return order;
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user")
     public List<Order> getOrdersByUser() {
         Long userId = getUserIdFromToken();
         return orderRepo.findByUserId(userId);
