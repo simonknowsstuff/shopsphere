@@ -7,6 +7,7 @@ import com.groupthree.shopsphere.repository.UserRepository;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
@@ -62,5 +63,12 @@ public class CartController {
         Cart cur = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
         repo.delete(cur);
         return ResponseEntity.status(HttpStatus.OK).body("Item deleted from cart");
+    }
+
+    @ExceptionHandler(DbActionExecutionException.class)
+    public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
     }
 }

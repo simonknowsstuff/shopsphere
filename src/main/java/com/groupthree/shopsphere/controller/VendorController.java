@@ -7,6 +7,7 @@ import com.groupthree.shopsphere.models.User;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -62,12 +63,13 @@ public class VendorController {
     }
     
     @DeleteMapping("/delete/{productId}")
-    public void deleteProduct(@PathVariable Long productId) {
+    public ResponseEntity<String> deleteProduct(@PathVariable Long productId) {
         Long vendorId = getVendorIdFromToken();
         Product prod = productRepo.findById(productId).orElseThrow();
         if (!prod.getVendorId().equals(vendorId)) {
             throw new RuntimeException();
         }
         productRepo.delete(prod);
+        return ResponseEntity.status(200).body("Product deleted");
     }
 }

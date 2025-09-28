@@ -54,3 +54,14 @@ CREATE TABLE order_items
     FOREIGN KEY (order_id) REFERENCES orders (id),
     FOREIGN KEY (product_id) REFERENCES products (id)
 );
+
+CREATE TABLE reviews
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id    BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    rating     DOUBLE,
+    review     VARCHAR(500),
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    FOREIGN KEY (product_id) REFERENCES products (id)
+)
