@@ -1,16 +1,13 @@
 package com.groupthree.shopsphere.models;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
+
 
 import jakarta.validation.constraints.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Table("USERS")
 public class User {
-    @Id
     private Long id;
 
     @NotNull
