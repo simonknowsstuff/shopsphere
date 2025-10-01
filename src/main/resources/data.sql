@@ -20,9 +20,9 @@ INSERT INTO orders (user_id, total_amount, status) VALUES
 (1, 1899.98, 'PENDING');
 
 -- Order Items
-INSERT INTO order_items (order_id, product_id, quantity) VALUES
-(1, 1, 1),
-(1, 2, 2);
+INSERT INTO order_items (order_id, product_id, quantity, price) VALUES
+(1, 1, 1, 699.99),
+(1, 2, 2, 1499.99);
 
 -- Reviews
 INSERT INTO reviews (user_id, product_id, rating, review) VALUES

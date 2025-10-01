@@ -18,7 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/cart")
+@RequestMapping(value = {"/cart/", "/cart"})
 public class CartController {
 
     private final UserRepository userRepository;
@@ -48,13 +48,13 @@ public class CartController {
         return user.getId();
     }
 
-    @GetMapping("/")
+    @GetMapping(value = {"/", ""})
     public Iterable<Cart> findAll() {
         Long userId = getUserIdFromToken();
         return repo.findByUserId(userId);
     }
 
-    @PostMapping("/")
+    @PostMapping(value = {"/", ""})
     public Cart save(@Valid @RequestBody Cart cart) {
         Long userId = getUserIdFromToken();
         cart.setUserId(userId);
@@ -62,7 +62,7 @@ public class CartController {
         return repo.save(cart);
     }
 
-    @PutMapping("/")
+    @PutMapping(value = {"/", ""})
     public Cart updateQuantity(@Valid @RequestBody Cart cart){
         Long userId = getUserIdFromToken();
         Cart existing = repo.findByUserIdAndProductId(userId, cart.getProductId()).orElseThrow();
@@ -70,7 +70,7 @@ public class CartController {
         return repo.save(existing);
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping(value = {"/", ""})
     public ResponseEntity<String> delete(@RequestBody Map<String,Long> body) {
         Long userId = getUserIdFromToken();
         Long productId = body.get("productId");

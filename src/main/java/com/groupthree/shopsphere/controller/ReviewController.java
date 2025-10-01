@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/reviews")
+@RequestMapping(value = {"/reviews/", "/reviews"})
 public class ReviewController {
     private final ReviewRepository repo;
     private final UserRepository userRepository;
@@ -47,12 +47,12 @@ public class ReviewController {
         return user.getId();
     }
 
-    @GetMapping("/products/{productId}")
+    @GetMapping(value = {"/products/{productId}/", "/products/{productId}"})
     public Iterable<Review> getReviews(@PathVariable Long productId) {
         return repo.findByProductId(productId);
     }
 
-    @PostMapping("/products/{productId}")
+    @PostMapping(value = {"/products/{productId}/", "/products/{productId}"})
     public Review addReview(@RequestBody Review review, @PathVariable Long productId) {
         Long userId = getUserIdFromToken();
         review.setUserId(userId);
@@ -61,7 +61,7 @@ public class ReviewController {
         return repo.save(review);
     }
 
-    @PutMapping("/products/{productId}")
+    @PutMapping(value = {"/products/{productId}/", "/products/{productId}"})
     public Review updateReview(@RequestBody Review review, @PathVariable Long productId) {
         Long userId = getUserIdFromToken();
         Review existing = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
@@ -71,7 +71,7 @@ public class ReviewController {
         return repo.save(existing);
     }
 
-    @DeleteMapping("/products/{productId}")
+    @DeleteMapping(value = {"/products/{productId}/", "/products/{productId}"})
     public ResponseEntity<String> deleteReview(@PathVariable Long productId) {
         Long userId = getUserIdFromToken();
         Review review = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
@@ -81,7 +81,7 @@ public class ReviewController {
                 .body("Review deleted");
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping(value = {"/user/{userId}/", "/user/{userId}"})
     public Iterable<Review> getReviewsByUser(@PathVariable Long userId) {
         return repo.findByUserId(userId);
     }

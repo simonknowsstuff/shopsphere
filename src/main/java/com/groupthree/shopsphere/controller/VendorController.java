@@ -7,13 +7,15 @@ import com.groupthree.shopsphere.models.User;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.relational.core.conversion.DbActionExecutionException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/vendor")
+@RequestMapping(value = {"/vendor/", "/vendor"})
 public class VendorController {
     private final ProductRepository productRepo;
     private final UserRepository userRepository;
@@ -34,20 +36,20 @@ public class VendorController {
         return user.getId();
     }
 
-    @GetMapping("/products")
+    @GetMapping(value = {"/products/", "/products"})
     public Iterable<Product> findById() {
         Long vendorId = getVendorIdFromToken();
         return productRepo.findByVendorId(vendorId);
     }
 
-    @PostMapping("/add")
+    @PostMapping(value = {"/add/", "/add"})
     public Product addProduct(@Valid @RequestBody Product product) {
         Long vendorId = getVendorIdFromToken();
         product.setVendorId(vendorId);
         return productRepo.save(product);
     }
 
-    @PutMapping("/products/{productId}")
+    @PutMapping(value = {"/products/{productId}/", "/products/{productId}"})
     public Product updateProduct(@PathVariable Long productId, @Valid @RequestBody Product product) {
         Long vendorId = getVendorIdFromToken();
         Product prod = productRepo.findById(productId).orElseThrow();
@@ -62,7 +64,7 @@ public class VendorController {
         return productRepo.save(prod);
     }
     
-    @DeleteMapping("/delete/{productId}")
+    @DeleteMapping(value = {"/delete/{productId}/", "/delete/{productId}"})
     public ResponseEntity<String> deleteProduct(@PathVariable Long productId) {
         Long vendorId = getVendorIdFromToken();
         Product prod = productRepo.findById(productId).orElseThrow();
@@ -71,5 +73,12 @@ public class VendorController {
         }
         productRepo.delete(prod);
         return ResponseEntity.status(200).body("Product deleted");
+    }
+
+    @ExceptionHandler(DbActionExecutionException.class)
+    public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
     }
 }
