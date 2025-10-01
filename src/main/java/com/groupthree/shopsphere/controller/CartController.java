@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -26,6 +27,18 @@ public class CartController {
     public CartController(CartRepository repo, UserRepository userRepository) {
         this.repo = repo;
         this.userRepository = userRepository;
+    }
+
+    private void validateCart(Cart cart) {
+        if (cart.getQuantity() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be greater than 0");
+        }
+        if (cart.getUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID must be provided");
+        }
+        if (cart.getProductId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product ID must be provided");
+        }
     }
 
     public Long getUserIdFromToken() {
@@ -45,6 +58,7 @@ public class CartController {
     public Cart save(@Valid @RequestBody Cart cart) {
         Long userId = getUserIdFromToken();
         cart.setUserId(userId);
+        validateCart(cart);
         return repo.save(cart);
     }
 

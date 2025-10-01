@@ -5,7 +5,6 @@ import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.ReviewRepository;
 
 import com.groupthree.shopsphere.repository.UserRepository;
-import jakarta.validation.Valid;
 
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@RequestMapping("/reviews")
 public class ReviewController {
     private final ReviewRepository repo;
     private final UserRepository userRepository;
@@ -25,6 +25,21 @@ public class ReviewController {
         this.userRepository = userRepository;
     }
 
+    private void validateReview(Review review) {
+        if (review.getRating() < 1 || review.getRating() > 5) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5");
+        }
+        if (review.getUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID must be provided");
+        }
+        if (review.getProductId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product ID must be provided");
+        }
+        if (review.getReview() == null || review.getReview().length() < 15 || review.getReview().length() > 500) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Review text must be between 15 and 500 characters");
+        }
+    }
+
     public Long getUserIdFromToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -32,37 +47,49 @@ public class ReviewController {
         return user.getId();
     }
 
-    @GetMapping("/products/{productId}/reviews")
+    @GetMapping("/products/{productId}")
     public Iterable<Review> getReviews(@PathVariable Long productId) {
         return repo.findByProductId(productId);
     }
 
-    @PostMapping("/products/{productId}/reviews")
-    public Review addReview(@Valid @RequestBody Review review, @PathVariable Long productId) {
+    @PostMapping("/products/{productId}")
+    public Review addReview(@RequestBody Review review, @PathVariable Long productId) {
         Long userId = getUserIdFromToken();
         review.setUserId(userId);
         review.setProductId(productId);
+        validateReview(review);
         return repo.save(review);
     }
 
-    @GetMapping("/users/{userId}/reviews")
+    @PutMapping("/products/{productId}")
+    public Review updateReview(@RequestBody Review review, @PathVariable Long productId) {
+        Long userId = getUserIdFromToken();
+        Review existing = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
+        existing.setReview(review.getReview());
+        existing.setRating(review.getRating());
+        validateReview(existing);
+        return repo.save(existing);
+    }
+
+    @DeleteMapping("/products/{productId}")
+    public ResponseEntity<String> deleteReview(@PathVariable Long productId) {
+        Long userId = getUserIdFromToken();
+        Review review = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
+        repo.delete(review);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Review deleted");
+    }
+
+    @GetMapping("/user/{userId}")
     public Iterable<Review> getReviewsByUser(@PathVariable Long userId) {
         return repo.findByUserId(userId);
     }
 
-    @DeleteMapping("/users/{userId}/reviews/{reviewId}")
-    public ResponseEntity<String> deleteReview(@PathVariable Long userId, @PathVariable Long reviewId) {
-        Long tokenUserId = getUserIdFromToken();
-        Review review = repo.findById(reviewId).orElseThrow();
-        if (!review.getUserId().equals(tokenUserId) && !userId.equals(tokenUserId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "User does not have permission to delete review"
-            );
-        }
-        repo.delete(review);
+    @ExceptionHandler(DbActionExecutionException.class)
+    public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
         return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .body("Review deleted");
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
     }
 }

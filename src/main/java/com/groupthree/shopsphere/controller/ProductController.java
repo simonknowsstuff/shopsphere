@@ -14,7 +14,7 @@ public class ProductController {
         this.repo = repo;
     }
 
-    @GetMapping
+    @GetMapping("/")
     public Iterable<Product> getProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search) {
@@ -31,5 +31,4 @@ public class ProductController {
     public Product getProduct(@PathVariable Long id) {
         return repo.findById(id).orElseThrow();
     }
-
 }

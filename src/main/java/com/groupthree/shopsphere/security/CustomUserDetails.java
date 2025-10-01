@@ -22,7 +22,7 @@ public class CustomUserDetails implements UserDetails {
 			return Collections.emptyList();
 		}
 		return user.getRole().stream()
-			.map(role -> new SimpleGrantedAuthority(role))
+			.map(SimpleGrantedAuthority::new)
 			.toList();
 	}
 

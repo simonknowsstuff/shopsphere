@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
+@Table("REVIEWS")
 public class Review {
     @Id
     private Long id;
@@ -19,7 +21,7 @@ public class Review {
     private Long productId;
 
     @NotNull
-    @Min(0)
+    @Min(1)
     @Max(5)
     private double rating;
 
