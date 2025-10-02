@@ -18,8 +18,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final TokenBlacklistService tokenBlacklistService;
+
+    public SecurityConfig(TokenBlacklistService tokenBlacklistService) {
+        this.tokenBlacklistService = tokenBlacklistService;
+    }
+
     public JwtUtil jwtUtil() {
-        return new JwtUtil();
+        return new JwtUtil(this.tokenBlacklistService);
     }
 
     @Bean
