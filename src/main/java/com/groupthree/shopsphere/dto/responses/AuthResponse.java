@@ -3,17 +3,19 @@ import java.util.Set;
 public class AuthResponse {
     private String status;
     private String message;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private Set<String> role;
 
     public AuthResponse() {
     }
 
-    public AuthResponse(String status, String message, Set<String> role, String token) {
+    public AuthResponse(String status, String message, Set<String> role, String accessToken, String refreshToken) {
         this.message = message;
         this.status = status;
         this.role = role;
-        this.token = token;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
     public String getMessage() {
@@ -39,10 +41,18 @@ public class AuthResponse {
         this.role = role;
     }
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return accessToken;
     }
-    public void setToken(String token) {
-        this.token = token;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

@@ -15,22 +15,42 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
+    private final TokenBlacklistService tokenBlacklistService;
     @Value("${jwt.secret}")
     private String secret;
 
-    private static final long EXPIRATION_TIME = 3600000; // 1 hour in ms.
+    @Value("${jwt.access.expiration}")
+    private static final long ACCESS_EXPIRATION_TIME = 300000; // 5 minutes in ms.
 
-    public String generateToken(String username) {
+    @Value("${jwt.refresh.expiration}")
+    private static final long REFRESH_EXPIRATION_TIME = 1209600000;
+
+    public JwtUtil(TokenBlacklistService tokenBlacklistService) {
+        this.tokenBlacklistService = tokenBlacklistService;
+    }
+
+    public String generateAccessToken(String email) {
+        return generateToken(email, ACCESS_EXPIRATION_TIME);
+    }
+
+    public String generateRefreshToken(String email) {
+        return generateToken(email, REFRESH_EXPIRATION_TIME);
+    }
+
+    public String generateToken(String username, long expirationTime) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public Boolean validateToken(String token) {
         try {
+            if (tokenBlacklistService.isBlacklisted(token)) {
+                return false;
+            }
             Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
