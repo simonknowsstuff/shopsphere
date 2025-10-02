@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = {"/cart/", "/cart"})
@@ -57,9 +58,16 @@ public class CartController {
     @PostMapping(value = {"/", ""})
     public Cart save(@Valid @RequestBody Cart cart) {
         Long userId = getUserIdFromToken();
+        Optional<Cart> existingOpt = repo.findByUserIdAndProductId(userId,cart.getProductId());
+        if(existingOpt.isPresent()){
+            Cart existing=existingOpt.get();
+            existing.setQuantity(existing.getQuantity()+1);
+            return repo.save(existing);
+        }
+        else{
         cart.setUserId(userId);
         validateCart(cart);
-        return repo.save(cart);
+        return repo.save(cart);}
     }
 
     @PutMapping(value = {"/", ""})
@@ -70,10 +78,10 @@ public class CartController {
         return repo.save(existing);
     }
 
-    @DeleteMapping(value = {"/", ""})
-    public ResponseEntity<String> delete(@RequestBody Map<String,Long> body) {
+    @DeleteMapping(value = {"/{productId}"})
+    public ResponseEntity<String> delete(@PathVariable Long productId) {
         Long userId = getUserIdFromToken();
-        Long productId = body.get("productId");
+
         Cart cur = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
         repo.delete(cur);
         return ResponseEntity.status(HttpStatus.OK).body("Item deleted from cart");
