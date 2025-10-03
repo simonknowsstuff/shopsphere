@@ -120,11 +120,8 @@ public class AuthController {
             }
 
             String newAccessToken = jwtUtil.generateAccessToken(email);
-            String newRefreshToken = jwtUtil.generateRefreshToken(email);
 
-            tokenBlacklistService.blacklistToken(refreshToken);
-
-            return new AuthResponse("success", "Refreshed", user.getRole(), newAccessToken, newRefreshToken);
+            return new AuthResponse("success", "Refreshed", user.getRole(), newAccessToken, null);
         } catch (Exception e) {
             return new AuthResponse("error", "Invalid refresh token", null, null, null);
         }
