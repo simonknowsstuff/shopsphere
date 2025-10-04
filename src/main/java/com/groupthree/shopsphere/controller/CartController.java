@@ -59,15 +59,15 @@ public class CartController {
     public Cart save(@Valid @RequestBody Cart cart) {
         Long userId = getUserIdFromToken();
         Optional<Cart> existingOpt = repo.findByUserIdAndProductId(userId,cart.getProductId());
-        if(existingOpt.isPresent()){
+        if (existingOpt.isPresent()) {
             Cart existing=existingOpt.get();
             existing.setQuantity(existing.getQuantity()+1);
             return repo.save(existing);
+        } else {
+            cart.setUserId(userId);
+            validateCart(cart);
+            return repo.save(cart);
         }
-        else{
-        cart.setUserId(userId);
-        validateCart(cart);
-        return repo.save(cart);}
     }
 
     @PutMapping(value = {"/", ""})
@@ -84,7 +84,9 @@ public class CartController {
 
         Cart cur = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
         repo.delete(cur);
-        return ResponseEntity.status(HttpStatus.OK).body("Item deleted from cart");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Item deleted from cart");
     }
 
     @ExceptionHandler(DbActionExecutionException.class)
