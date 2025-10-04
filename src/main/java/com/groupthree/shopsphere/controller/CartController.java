@@ -87,6 +87,13 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body("Item deleted from cart");
     }
 
+    @DeleteMapping(value={"/",""})
+    public ResponseEntity<String> clearUser() {
+        Long userId = getUserIdFromToken();
+        repo.deleteAllByUserId(userId);
+        return ResponseEntity.status(HttpStatus.OK).body("Cart cleared");
+    }
+
     @ExceptionHandler(DbActionExecutionException.class)
     public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
         return ResponseEntity
