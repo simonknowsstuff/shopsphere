@@ -86,6 +86,12 @@ public class ReviewController {
         return repo.findByUserId(userId);
     }
 
+    @GetMapping(value={"/user","/user/"})
+    public Iterable<Review> getOurReviews() {
+        Long userId = getUserIdFromToken();
+        return repo.findByUserId(userId);
+    }
+
     @ExceptionHandler(DbActionExecutionException.class)
     public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
         return ResponseEntity

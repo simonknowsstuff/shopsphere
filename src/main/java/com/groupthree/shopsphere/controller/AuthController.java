@@ -57,7 +57,7 @@ public class AuthController {
     }
 
     @PostMapping(value = {"/register/vendor/", "/register/vendor"})
-    public AuthResponse vendorRegister(@Valid @RequestBody RegisterRequest request, @RequestHeader("Authorization") String token){
+    public AuthResponse vendorRegister(@Valid @RequestBody RegisterRequest request, @RequestHeader(value="Authorization",required = false) String token){
         User existing = repo.findByEmail(request.getEmail());
         if (existing != null) {
             if (existing.getRole().contains("VENDOR")) { // Already a vendor
