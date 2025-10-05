@@ -4,6 +4,7 @@ import com.groupthree.shopsphere.models.Cart;
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.CartRepository;
 import com.groupthree.shopsphere.repository.UserRepository;
+import com.groupthree.shopsphere.dto.responses.CartResponse;
 
 import jakarta.validation.Valid;
 
@@ -15,7 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -56,50 +56,83 @@ public class CartController {
     }
 
     @PostMapping(value = {"/", ""})
-    public Cart save(@Valid @RequestBody Cart cart) {
-        Long userId = getUserIdFromToken();
-        Optional<Cart> existingOpt = repo.findByUserIdAndProductId(userId,cart.getProductId());
-        if (existingOpt.isPresent()) {
-            Cart existing=existingOpt.get();
-            existing.setQuantity(existing.getQuantity()+1);
-            return repo.save(existing);
-        } else {
-            cart.setUserId(userId);
-            validateCart(cart);
-            return repo.save(cart);
+    public CartResponse save(@Valid @RequestBody Cart cart) {
+        try {
+            Long userId = getUserIdFromToken();
+            Optional<Cart> existingOpt = repo.findByUserIdAndProductId(userId, cart.getProductId());
+            if (existingOpt.isPresent()) {
+                Cart existing = existingOpt.get();
+                existing.setQuantity(existing.getQuantity() + 1);
+                repo.save(existing);
+                return new CartResponse(
+                        "success",
+                        "Cart updated successfully",
+                        existing.getId(),
+                        existing.getUserId(),
+                        existing.getProductId(),
+                        existing.getQuantity()
+                );
+            } else {
+                cart.setUserId(userId);
+                validateCart(cart);
+                repo.save(cart);
+                return new CartResponse(
+                        "success",
+                        "Cart saved successfully",
+                        cart.getId(),
+                        cart.getUserId(),
+                        cart.getProductId(),
+                        cart.getQuantity()
+                );
+            }
+        } catch (Exception e) {
+            return new CartResponse("error", e.getMessage());
         }
     }
 
     @PutMapping(value = {"/", ""})
-    public Cart updateQuantity(@Valid @RequestBody Cart cart){
-        Long userId = getUserIdFromToken();
-        Cart existing = repo.findByUserIdAndProductId(userId, cart.getProductId()).orElseThrow();
-        existing.setQuantity(cart.getQuantity());
-        return repo.save(existing);
+    public CartResponse updateQuantity(@Valid @RequestBody Cart cart){
+        try {
+            Long userId = getUserIdFromToken();
+            Cart existing = repo.findByUserIdAndProductId(userId, cart.getProductId()).orElseThrow();
+            existing.setQuantity(cart.getQuantity());
+            return new CartResponse(
+                    "success",
+                    "Cart quantity updated successfully",
+                    existing.getId(),
+                    existing.getUserId(),
+                    existing.getProductId(),
+                    existing.getQuantity()
+            );
+        } catch (Exception e) {
+            return new CartResponse(
+                    "error",
+                    e.getMessage()
+            );
+        }
     }
 
     @DeleteMapping(value = {"/{productId}"})
-    public ResponseEntity<String> delete(@PathVariable Long productId) {
-        Long userId = getUserIdFromToken();
+    public CartResponse delete(@PathVariable Long productId) {
+        try {
+            Long userId = getUserIdFromToken();
 
-        Cart cur = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
-        repo.delete(cur);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("Item deleted from cart");
+            Cart cur = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
+            repo.delete(cur);
+            return new CartResponse("success", "Cart deleted successfully");
+        } catch (Exception e) {
+            return new CartResponse("error", e.getMessage());
+        }
     }
 
     @DeleteMapping(value={"/",""})
-    public ResponseEntity<String> clearUser() {
-        Long userId = getUserIdFromToken();
-        repo.deleteAllByUserId(userId);
-        return ResponseEntity.status(HttpStatus.OK).body("Cart cleared");
-    }
-
-    @ExceptionHandler(DbActionExecutionException.class)
-    public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
+    public CartResponse clearUser() {
+        try {
+            Long userId = getUserIdFromToken();
+            repo.deleteAllByUserId(userId);
+            return new CartResponse("success", "Cart removed from user");
+        } catch (Exception e) {
+            return new CartResponse("error", e.getMessage());
+        }
     }
 }

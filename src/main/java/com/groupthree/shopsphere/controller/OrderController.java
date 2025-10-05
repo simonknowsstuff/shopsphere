@@ -1,5 +1,6 @@
 package com.groupthree.shopsphere.controller;
 
+import com.groupthree.shopsphere.dto.responses.OrderResponse;
 import com.groupthree.shopsphere.models.*;
 import com.groupthree.shopsphere.repository.*;
 
@@ -43,35 +44,48 @@ public class OrderController {
     }
 
     @PostMapping(value = {"/", ""})
-    public Order createOrder() {
-        Long userId = getUserIdFromToken();
-        List<Cart> cartItems = cartRepository.findByUserId(userId);
-        if (cartItems.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
-        }
-        Order order = new Order(userId, BigDecimal.ZERO, "PENDING");
-        order = orderRepo.save(order);
+    public OrderResponse createOrder() {
+        try {
+            Long userId = getUserIdFromToken();
+            List<Cart> cartItems = cartRepository.findByUserId(userId);
+            if (cartItems.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
+            }
+            Order order = new Order(userId, BigDecimal.ZERO, "PENDING");
+            order = orderRepo.save(order);
 
-        BigDecimal total = BigDecimal.ZERO;
-        for (Cart cartItem : cartItems) {
-            Product product = productRepo.findById(cartItem.getProductId()).orElseThrow(
-                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
-                
-            OrderItem item = new OrderItem();
-            item.setProductId(product.getId());
-            item.setQuantity(cartItem.getQuantity());
-            item.setPrice(BigDecimal.valueOf(product.getPrice()));
-            item.setOrderId(order.getId());
-            
-            BigDecimal itemTotal = item.getPrice()
-                .multiply(BigDecimal.valueOf(item.getQuantity()));
-            total = total.add(itemTotal);
-            
-            orderItemRepo.save(item);
-            cartRepository.delete(cartItem);
+            BigDecimal total = BigDecimal.ZERO;
+            for (Cart cartItem : cartItems) {
+                Product product = productRepo.findById(cartItem.getProductId()).orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+                OrderItem item = new OrderItem();
+                item.setProductId(product.getId());
+                item.setQuantity(cartItem.getQuantity());
+                item.setPrice(BigDecimal.valueOf(product.getPrice()));
+                item.setOrderId(order.getId());
+
+                BigDecimal itemTotal = item.getPrice()
+                        .multiply(BigDecimal.valueOf(item.getQuantity()));
+                total = total.add(itemTotal);
+
+                orderItemRepo.save(item);
+                cartRepository.delete(cartItem);
+            }
+            order.setTotalAmount(total);
+            orderRepo.save(order);
+            return new OrderResponse(
+                    "success",
+                    "Order saved successfully",
+                    order.getId(),
+                    order.getUserId(),
+                    order.getOrderDate(),
+                    order.getTotalAmount(),
+                    order.getStatus()
+            );
+        } catch (Exception e) {
+            return new OrderResponse("error", e.getMessage());
         }
-        order.setTotalAmount(total);
-        return orderRepo.save(order);
     }
 
     @GetMapping(value = {"/", ""})
@@ -83,12 +97,5 @@ public class OrderController {
     @GetMapping(value = {"/{orderId}/items/", "/{orderId}/items"})
     public List<OrderItem> getOrderItems(@PathVariable Long orderId) {
         return orderItemRepo.findByOrderId(orderId);
-    }
-
-    @ExceptionHandler(DbActionExecutionException.class)
-    public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
     }
 }

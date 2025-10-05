@@ -1,5 +1,6 @@
 package com.groupthree.shopsphere.controller;
 
+import com.groupthree.shopsphere.dto.responses.ReviewResponse;
 import com.groupthree.shopsphere.models.Review;
 import com.groupthree.shopsphere.models.User;
 import com.groupthree.shopsphere.repository.ReviewRepository;
@@ -53,32 +54,58 @@ public class ReviewController {
     }
 
     @PostMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public Review addReview(@RequestBody Review review, @PathVariable Long productId) {
-        Long userId = getUserIdFromToken();
-        review.setUserId(userId);
-        review.setProductId(productId);
-        validateReview(review);
-        return repo.save(review);
+    public ReviewResponse addReview(@RequestBody Review review, @PathVariable Long productId) {
+        try {
+            Long userId = getUserIdFromToken();
+            review.setUserId(userId);
+            review.setProductId(productId);
+            validateReview(review);
+            repo.save(review);
+            return new ReviewResponse(
+                    "success",
+                    "Review added successfully",
+                    review.getId(),
+                    review.getUserId(),
+                    review.getProductId(),
+                    review.getReview()
+            );
+        } catch (Exception e) {
+            return new ReviewResponse("error", e.getMessage());
+        }
     }
 
     @PutMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public Review updateReview(@RequestBody Review review, @PathVariable Long productId) {
-        Long userId = getUserIdFromToken();
-        Review existing = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
-        existing.setReview(review.getReview());
-        existing.setRating(review.getRating());
-        validateReview(existing);
-        return repo.save(existing);
+    public ReviewResponse updateReview(@RequestBody Review review, @PathVariable Long productId) {
+        try {
+            Long userId = getUserIdFromToken();
+            Review existing = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
+            existing.setReview(review.getReview());
+            existing.setRating(review.getRating());
+            validateReview(existing);
+            repo.save(review);
+            return new ReviewResponse(
+                    "success",
+                    "Review updated successfully",
+                    existing.getId(),
+                    existing.getUserId(),
+                    existing.getProductId(),
+                    existing.getReview()
+            );
+        } catch (Exception e) {
+            return new ReviewResponse("error", e.getMessage());
+        }
     }
 
     @DeleteMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public ResponseEntity<String> deleteReview(@PathVariable Long productId) {
-        Long userId = getUserIdFromToken();
-        Review review = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
-        repo.delete(review);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("Review deleted");
+    public ReviewResponse deleteReview(@PathVariable Long productId) {
+        try {
+            Long userId = getUserIdFromToken();
+            Review review = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
+            repo.delete(review);
+            return new ReviewResponse("success", "Review deleted successfully");
+        } catch (Exception e) {
+            return new ReviewResponse("error", e.getMessage());
+        }
     }
 
     @GetMapping(value = {"/user/{userId}/", "/user/{userId}"})
@@ -90,12 +117,5 @@ public class ReviewController {
     public Iterable<Review> getOurReviews() {
         Long userId = getUserIdFromToken();
         return repo.findByUserId(userId);
-    }
-
-    @ExceptionHandler(DbActionExecutionException.class)
-    public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
     }
 }

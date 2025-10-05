@@ -1,5 +1,6 @@
 package com.groupthree.shopsphere.controller;
 
+import com.groupthree.shopsphere.dto.responses.ProductResponse;
 import com.groupthree.shopsphere.models.Product;
 import com.groupthree.shopsphere.repository.ProductRepository;
 import com.groupthree.shopsphere.repository.UserRepository;
@@ -43,42 +44,79 @@ public class VendorController {
     }
 
     @PostMapping(value = {"/add/", "/add"})
-    public Product addProduct(@Valid @RequestBody Product product) {
-        Long vendorId = getVendorIdFromToken();
-        product.setVendorId(vendorId);
-        return productRepo.save(product);
+    public ProductResponse addProduct(@Valid @RequestBody Product product) {
+        try {
+            Long vendorId = getVendorIdFromToken();
+            product.setVendorId(vendorId);
+            productRepo.save(product);
+            return new ProductResponse(
+                    "success",
+                    "Product added successfully",
+                    product.getId(),
+                    product.getName(),
+                    product.getPrice(),
+                    product.getOriginalPrice(),
+                    product.getDescription(),
+                    product.getCategory(),
+                    product.getImage(),
+                    product.getRating(),
+                    product.getReviewCount(),
+                    product.getInStock(),
+                    product.getFeatures(),
+                    product.getVendorId()
+            );
+        } catch (Exception e) {
+            return new ProductResponse("error: ", e.getMessage());
+        }
     }
 
     @PutMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public Product updateProduct(@PathVariable Long productId, @Valid @RequestBody Product product) {
-        Long vendorId = getVendorIdFromToken();
-        Product prod = productRepo.findById(productId).orElseThrow();
-        if (!prod.getVendorId().equals(vendorId)) {
-            throw new RuntimeException();
+    public ProductResponse updateProduct(@PathVariable Long productId, @Valid @RequestBody Product product) {
+        try {
+            Long vendorId = getVendorIdFromToken();
+            Product prod = productRepo.findById(productId).orElseThrow();
+            if (!prod.getVendorId().equals(vendorId)) {
+                throw new RuntimeException();
+            }
+            prod.setPrice(product.getPrice());
+            prod.setCategory(product.getCategory());
+            prod.setRating(product.getRating());
+            prod.setInStock(product.getInStock());
+            prod.setReviewCount(product.getReviewCount());
+            productRepo.save(prod);
+            return new ProductResponse(
+                    "success",
+                    "Product updated successfully",
+                    prod.getId(),
+                    prod.getName(),
+                    prod.getPrice(),
+                    prod.getOriginalPrice(),
+                    prod.getDescription(),
+                    prod.getCategory(),
+                    prod.getImage(),
+                    prod.getRating(),
+                    prod.getReviewCount(),
+                    prod.getInStock(),
+                    prod.getFeatures(),
+                    prod.getVendorId()
+            );
+        } catch (Exception e) {
+            return new ProductResponse("error", e.getMessage());
         }
-        prod.setPrice(product.getPrice());
-        prod.setCategory(product.getCategory());
-        prod.setRating(product.getRating());
-        prod.setInStock(product.getInStock());
-        prod.setReviewCount(product.getReviewCount());
-        return productRepo.save(prod);
     }
     
     @DeleteMapping(value = {"/delete/{productId}/", "/delete/{productId}"})
-    public ResponseEntity<String> deleteProduct(@PathVariable Long productId) {
-        Long vendorId = getVendorIdFromToken();
-        Product prod = productRepo.findById(productId).orElseThrow();
-        if (!prod.getVendorId().equals(vendorId)) {
-            throw new RuntimeException();
+    public ProductResponse deleteProduct(@PathVariable Long productId) {
+        try {
+            Long vendorId = getVendorIdFromToken();
+            Product prod = productRepo.findById(productId).orElseThrow();
+            if (!prod.getVendorId().equals(vendorId)) {
+                throw new RuntimeException();
+            }
+            productRepo.delete(prod);
+        } catch (Exception e) {
+            return new ProductResponse("error", e.getMessage());
         }
-        productRepo.delete(prod);
-        return ResponseEntity.status(200).body("Product deleted");
-    }
-
-    @ExceptionHandler(DbActionExecutionException.class)
-    public ResponseEntity<String> handleDbActionExecutionException(DbActionExecutionException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
+        return new ProductResponse("success", "Product deleted successfully");
     }
 }

@@ -1,0 +1,148 @@
+package com.groupthree.shopsphere.dto.responses;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+
+public class ProductResponse {
+    @NotNull
+    private String status;
+    @NotEmpty
+    private String message;
+
+    private Long id;
+    private String name;
+    private double price;
+    private double originalPrice;
+    private String description;
+    private String category;
+    private String image;
+    private double rating;
+    private int reviewCount;
+    private boolean inStock;
+    private List<String> features;
+    private Long vendorId;
+
+    public ProductResponse(String status, String message) {
+        this.status = status;
+        this.message = message;
+    }
+
+    public ProductResponse(String status, String message, Long id, String name, double price, double originalPrice, String description, String category, String image, double rating, int reviewCount, boolean inStock, List<String> features, Long vendorId) {
+        this.status = status;
+        this.message = message;
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.originalPrice = originalPrice;
+        this.description = description;
+        this.category = category;
+        this.image = image;
+        this.rating = rating;
+        this.reviewCount = reviewCount;
+        this.inStock = inStock;
+        this.features = features;
+        this.vendorId = vendorId;
+    }
+
+    // Getters and setters
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public double getOriginalPrice() {
+        return originalPrice;
+    }
+    public void setOriginalPrice(double originalPrice) {
+        this.originalPrice = originalPrice;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getImage() {
+        return image;
+    }
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public int getReviewCount() {
+        return reviewCount;
+    }
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
+    }
+
+    public boolean getInStock() {
+        return inStock;
+    }
+    public void setInStock(boolean inStock) {
+        this.inStock = inStock;
+    }
+
+    public List<String> getFeatures() {
+        return features;
+    }
+    public void setFeatures(List<String> features) {
+        this.features = features;
+    }
+
+    public Long getVendorId() {
+        return vendorId;
+    }
+
+    public void setVendorId(Long vendorId) {
+        this.vendorId = vendorId;
+    }
+}

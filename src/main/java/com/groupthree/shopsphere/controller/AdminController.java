@@ -1,5 +1,9 @@
 package com.groupthree.shopsphere.controller;
 
+import com.groupthree.shopsphere.dto.responses.OrderResponse;
+import com.groupthree.shopsphere.dto.responses.ProductResponse;
+import com.groupthree.shopsphere.dto.responses.ReviewResponse;
+import com.groupthree.shopsphere.dto.responses.UserResponse;
 import com.groupthree.shopsphere.models.*;
 import com.groupthree.shopsphere.repository.UserRepository;
 import com.groupthree.shopsphere.repository.ProductRepository;
@@ -13,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -30,159 +36,286 @@ public class AdminController {
         this.reviewRepo = reviewRepo;
     }
 
-    private ResponseEntity<Order> getOrdersSum(@RequestBody @Valid List<OrderItem> orders, Order order, BigDecimal total) {
-        for (OrderItem item : orders) {
-            Product product = productRepo.findById(item.getProductId()).orElseThrow(
-                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
-            item.setPrice(BigDecimal.valueOf(product.getPrice()));
-
-            BigDecimal itemTotal = BigDecimal.valueOf(product.getPrice())
-                    .multiply(BigDecimal.valueOf(item.getQuantity()));
-            total = total.add(itemTotal);
-
-            item.setOrderId(order.getId());
+    private List<ProductResponse> productToResponse(Iterable<Product> products) {
+        try {
+            List<ProductResponse> productResponses = new ArrayList<>();
+            for (Product product : products) {
+                ProductResponse response = new ProductResponse(
+                        "success",
+                        "Product obtained successfully",
+                        product.getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getOriginalPrice(),
+                        product.getDescription(),
+                        product.getCategory(),
+                        product.getImage(),
+                        product.getRating(),
+                        product.getReviewCount(),
+                        product.getInStock(),
+                        product.getFeatures(),
+                        product.getVendorId()
+                );
+                productResponses.add(response);
+            }
+            return productResponses;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        order.setTotalAmount(total);
-        orderRepo.save(order);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(order);
+    }
+
+    private List<OrderResponse> getOrderResponses(Iterable<Order> orders) {
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            OrderResponse orderResponse = new OrderResponse(
+                    "success",
+                    "Order obtained successfully",
+                    order.getId(),
+                    order.getUserId(),
+                    order.getOrderDate(),
+                    order.getTotalAmount(),
+                    order.getStatus()
+            );
+            orderResponses.add(orderResponse);
+        }
+        return orderResponses;
+    }
+
+    private List<ReviewResponse> getReviewResponses(Iterable<Review> reviews) {
+        List<ReviewResponse> reviewResponses = new ArrayList<>();
+        for (Review review : reviews) {
+            ReviewResponse reviewResponse = new ReviewResponse(
+                    "success",
+                    "Review obtained successfully",
+                    review.getId(),
+                    review.getUserId(),
+                    review.getProductId(),
+                    review.getReview()
+            );
+            reviewResponses.add(reviewResponse);
+        }
+        return reviewResponses;
+    }
+
+    private OrderResponse getOrdersSum(@RequestBody @Valid List<OrderItem> orders, Order order, BigDecimal total) {
+        try {
+            for (OrderItem item : orders) {
+                Product product = productRepo.findById(item.getProductId()).orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+                item.setPrice(BigDecimal.valueOf(product.getPrice()));
+
+                BigDecimal itemTotal = BigDecimal.valueOf(product.getPrice())
+                        .multiply(BigDecimal.valueOf(item.getQuantity()));
+                total = total.add(itemTotal);
+
+                item.setOrderId(order.getId());
+            }
+            order.setTotalAmount(total);
+            orderRepo.save(order);
+            return new OrderResponse(
+                    "success",
+                    "Order saved successfully",
+                    order.getId(),
+                    order.getUserId(),
+                    order.getOrderDate(),
+                    order.getTotalAmount(),
+                    order.getStatus()
+            );
+        } catch (Exception e) {
+            return new OrderResponse("error", e.getMessage());
+        }
     }
 
     // Users
     @GetMapping(value = {"/users/", "/users"})
-    public Iterable<User> getUsers() {
-        return userRepo.findAll();
+    public List<UserResponse> getUsers() {
+        try {
+            Iterable<User> users = userRepo.findAll();
+            List<UserResponse> userResponses = new ArrayList<>();
+            for (User user : users) {
+                UserResponse userResponse = new UserResponse(
+                        "success",
+                        "User obtained successfully",
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRole()
+                );
+                userResponses.add(userResponse);
+            }
+            return userResponses;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            return Collections.singletonList(new UserResponse("error", e.getMessage()));
+        }
     }
 
     @GetMapping(value = {"/users/{userId}/", "/users/{userId}"})
-    public User getUser(@PathVariable Long userId) {
-        return userRepo.findById(userId).orElseThrow();
+    public UserResponse getUser(@PathVariable Long userId) {
+        try {
+            User user = userRepo.findById(userId).orElseThrow();
+            return new UserResponse(
+                    "success",
+                    "User obtained successfully",
+                    user.getId(),
+                    user.getEmail(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getRole()
+            );
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            return new UserResponse("error", e.getMessage());
+        }
     }
 
     @PostMapping(value = {"/users/", "/users"})
-    public ResponseEntity<String> addUser(@Valid @RequestBody User user) {
+    public UserResponse addUser(@Valid @RequestBody User user) {
         try {
             userRepo.save(user);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error adding user: " + e.getMessage());
+            return new UserResponse("error", e.getMessage());
         }
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("User added");
+        return new UserResponse("success", "User added successfully");
+    }
+
+    @PutMapping(value = {"/users/{userId}/", "/users/{userId}"})
+    public UserResponse updateUser(@Valid @RequestBody User user, @PathVariable Long userId) {
+        try {
+            userRepo.findById(userId).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+            );
+            user.setId(userId);
+            userRepo.save(user);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            return new UserResponse("error", e.getMessage());
+        }
+        return new UserResponse("success", "User updated successfully");
     }
 
     @DeleteMapping(value = {"/users/{userId}/", "/users/{userId}"})
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+    public UserResponse deleteUser(@PathVariable Long userId) {
         try {
             userRepo.deleteById(userId);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error deleting user: " + e.getMessage());
+            return new UserResponse("error", e.getMessage());
         }
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("User deleted");
+        return new UserResponse("success", "User deleted successfully");
     }
 
     // Products
     @GetMapping(value = {"/products/", "/products"})
-    public Iterable<Product> getProducts() {
-        return productRepo.findAll();
+    public Iterable<ProductResponse> getProducts() {
+        try {
+            return productToResponse(productRepo.findAll());
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            return Collections.singletonList(new ProductResponse("error", e.getMessage()));
+        }
     }
 
     @PostMapping(value = {"/products/", "/products"})
-    public ResponseEntity<String> addProduct(@Valid @RequestBody List<Product> products) {
+    public ProductResponse addProduct(@Valid @RequestBody List<Product> products) {
         try {
             productRepo.saveAll(products);
         } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error adding products: " + e.getMessage());
+            return new ProductResponse("error", e.getMessage());
         }
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("Products added");
+        return new ProductResponse("success", "Products added successfully");
     }
 
     @DeleteMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public ResponseEntity<String> deleteProduct(@PathVariable Long productId) {
+    public ProductResponse deleteProduct(@PathVariable Long productId) {
         try {
             productRepo.deleteById(productId);
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error deleting product: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw e;
         }
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("Product deleted");
+        catch (Exception e) {
+            return new ProductResponse("error", e.getMessage());
+        }
+        return new ProductResponse("success", "Product deleted successfully");
     }
 
     // Orders
     @GetMapping(value = {"/orders/", "/orders"})
-    public Iterable<Order> getOrders() {
-        return orderRepo.findAll();
+    public List<OrderResponse> getOrders() {
+        try {
+            Iterable<Order> orders = orderRepo.findAll();
+            return getOrderResponses(orders);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            return Collections.singletonList(new OrderResponse("error", e.getMessage()));
+        }
     }
 
     @GetMapping(value = {"/orders/{orderId}/", "/orders/{orderId}"})
-    public ResponseEntity<?> getOrder(@PathVariable Long orderId) {
+    public OrderResponse getOrder(@PathVariable Long orderId) {
         try {
             Order order = orderRepo.findById(orderId).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found")
             );
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(order);
+            return new OrderResponse(
+                    "success",
+                    "Order obtained successfully",
+                    order.getId(),
+                    order.getUserId(),
+                    order.getOrderDate(),
+                    order.getTotalAmount(),
+                    order.getStatus()
+            );
         }
         catch (ResponseStatusException e) {
             throw e;
         }
         catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error getting order: " + e.getMessage());
+            return new OrderResponse("error", e.getMessage());
         }
     }
 
     @GetMapping(value = {"/orders/users/{userId}/", "/orders/users/{userId}"})
-    public ResponseEntity<?> getOrdersByUser(@PathVariable Long userId) {
+    public List<OrderResponse> getOrdersByUser(@PathVariable Long userId) {
         try {
             List<Order> orders = orderRepo.findByUserId(userId);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(orders);
+            return getOrderResponses(orders);
         }
         catch (ResponseStatusException e) {
             throw e;
         }
         catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error getting orders for user: " + e.getMessage());
+            return Collections.singletonList(new OrderResponse("error", e.getMessage()));
         }
     }
 
     @PostMapping(value = {"/orders/users/{userId}/", "/orders/users/{userId}"})
-    public ResponseEntity<?> addOrderForUser(@Valid @RequestBody List<OrderItem> orders, @PathVariable Long userId) {
+    public OrderResponse addOrderForUser(@Valid @RequestBody List<OrderItem> orders, @PathVariable Long userId) {
         try {
             Order order = new Order(userId, BigDecimal.ZERO, "PENDING");
             order = orderRepo.save(order);
 
             BigDecimal total = BigDecimal.ZERO;
             return getOrdersSum(orders, order, total);
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error adding order: " + e.getMessage());
+        } catch (RuntimeException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            return new OrderResponse("error", e.getMessage());
         }
     }
 
     @PutMapping(value = {"/orders/{orderId}/", "/orders/{orderId}"})
-    public ResponseEntity<?> updateOrderItems(@Valid @RequestBody List<OrderItem> orders, @PathVariable Long orderId) {
+    public OrderResponse updateOrderItems(@Valid @RequestBody List<OrderItem> orders, @PathVariable Long orderId) {
         try {
             Order order = orderRepo.findById(orderId).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
@@ -195,127 +328,135 @@ public class AdminController {
             throw e;
         }
         catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error adding order: " + e.getMessage());
+            return new OrderResponse("error", e.getMessage());
         }
     }
 
     @PutMapping(value = {"/orders/update/{orderId}/", "/orders/update/{orderId}"})
-    public ResponseEntity<String> updateOrder(@Valid @RequestBody Order order, @PathVariable Long orderId) {
+    public OrderResponse updateOrder(@Valid @RequestBody Order order, @PathVariable Long orderId) {
         try {
             orderRepo.findById(orderId).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found")
             );
             order.setId(orderId);
             orderRepo.save(order);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body("Order updated");
+            return new OrderResponse(
+                    "success",
+                    "Order updated successfully",
+                    order.getId(),
+                    order.getUserId(),
+                    order.getOrderDate(),
+                    order.getTotalAmount(),
+                    order.getStatus()
+            );
         }
         catch (ResponseStatusException e) {
             throw e;
         }
         catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error updating order: " + e.getMessage());
+            return new OrderResponse("error", e.getMessage());
         }
     }
 
     @DeleteMapping(value = {"/orders/{orderId}/", "/orders/{orderId}"})
-    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
+    public OrderResponse deleteOrder(@PathVariable Long orderId) {
         try {
             Order order = orderRepo.findById(orderId).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
             orderRepo.delete(order);
-            return ResponseEntity.status(HttpStatus.OK).body("Order deleted");
+            return new OrderResponse(
+                    "success",
+                    "Order deleted successfully"
+            );
         }
         catch (ResponseStatusException e) {
             throw e;
         }
         catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error deleting order: " + e.getMessage());
+            return new OrderResponse("error", e.getMessage());
         }
     }
 
     // Reviews
     @GetMapping(value = {"/reviews/", "/reviews"})
-    public Iterable<Review> getReviews() {
-        return reviewRepo.findAll();
+    public List<ReviewResponse> getReviews() {
+        try {
+            Iterable<Review> reviews = reviewRepo.findAll();
+            return getReviewResponses(reviews);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            return Collections.singletonList(new ReviewResponse("error", e.getMessage()));
+        }
     }
 
     @GetMapping(value = {"/reviews/users/{userId}/", "/reviews/users/{userId}"})
-    public ResponseEntity<?> getReviewsByUser(@PathVariable Long userId) {
+    public List<ReviewResponse> getReviewsByUser(@PathVariable Long userId) {
         try {
             List<Review> reviews = reviewRepo.findByUserId(userId);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(reviews);
+            return getReviewResponses(reviews);
         }
         catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error getting reviews for user: " + e.getMessage());
+            return Collections.singletonList(new ReviewResponse("error", e.getMessage()));
         }
     }
 
     @PostMapping(value = {"/reviews/users/{userId}/", "/reviews/users/{userId}"})
-    public ResponseEntity<?> addReviewForUser(@Valid @RequestBody Review review, @PathVariable Long userId) {
+    public ReviewResponse addReviewForUser(@Valid @RequestBody Review review, @PathVariable Long userId) {
         try {
             review.setUserId(userId);
             reviewRepo.save(review);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body("Review added");
-        }
-        catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error adding review: " + e.getMessage());
+            return new ReviewResponse(
+                    "success",
+                    "Review added successfully",
+                    review.getId(),
+                    review.getUserId(),
+                    review.getProductId(),
+                    review.getReview()
+            );
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            return new ReviewResponse("error", e.getMessage());
         }
     }
 
     @PutMapping(value = {"/reviews/{reviewId}/", "/reviews/{reviewId}"})
-    public ResponseEntity<?> updateReview(@Valid @RequestBody Review review, @PathVariable Long reviewId) {
+    public ReviewResponse updateReview(@Valid @RequestBody Review review, @PathVariable Long reviewId) {
         try {
             reviewRepo.findById(reviewId).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found")
             );
             review.setId(reviewId);
             reviewRepo.save(review);
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body("Review updated");
-        }
-        catch (ResponseStatusException e) {
+            return new ReviewResponse(
+                    "success",
+                    "Review added successfully",
+                    review.getId(),
+                    review.getUserId(),
+                    review.getProductId(),
+                    review.getReview()
+            );
+        } catch (ResponseStatusException e) {
             throw e;
-        }
-        catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error updating review: " + e.getMessage());
+        } catch (Exception e) {
+            return new ReviewResponse("error", e.getMessage());
         }
     }
 
     @DeleteMapping(value = {"/reviews/{reviewId}/", "/reviews/{reviewId}"})
-    public ResponseEntity<String> deleteReview(@PathVariable Long reviewId) {
+    public ReviewResponse deleteReview(@PathVariable Long reviewId) {
         try {
             Review review = reviewRepo.findById(reviewId).orElseThrow(
                     () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
             reviewRepo.delete(review);
-            return ResponseEntity.status(HttpStatus.OK).body("Review deleted");
-        }
-        catch (ResponseStatusException e) {
+            return new ReviewResponse("success", "Review deleted successfully");
+        } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Error deleting review: " + e.getMessage());
+            return new ReviewResponse("error", e.getMessage());
         }
     }
 }
