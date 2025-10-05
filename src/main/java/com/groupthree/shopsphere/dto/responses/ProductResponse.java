@@ -1,8 +1,10 @@
 package com.groupthree.shopsphere.dto.responses;
 
+import com.groupthree.shopsphere.models.Product;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductResponse {
@@ -44,6 +46,53 @@ public class ProductResponse {
         this.inStock = inStock;
         this.features = features;
         this.vendorId = vendorId;
+    }
+
+    public static ProductResponse fromProduct(Product savedProduct, String message) {
+        return new ProductResponse(
+                "success",
+                message,
+                savedProduct.getId(),
+                savedProduct.getName(),
+                savedProduct.getPrice(),
+                savedProduct.getOriginalPrice(),
+                savedProduct.getDescription(),
+                savedProduct.getCategory(),
+                savedProduct.getImage(),
+                savedProduct.getRating(),
+                savedProduct.getReviewCount(),
+                savedProduct.getInStock(),
+                savedProduct.getFeatures(),
+                savedProduct.getVendorId()
+        );
+    }
+
+    public static List<ProductResponse> getProductResponses(Iterable<Product> products) {
+        try {
+            List<ProductResponse> productResponses = new ArrayList<>();
+            for (Product product : products) {
+                ProductResponse response = new ProductResponse(
+                        "success",
+                        "Product obtained successfully",
+                        product.getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getOriginalPrice(),
+                        product.getDescription(),
+                        product.getCategory(),
+                        product.getImage(),
+                        product.getRating(),
+                        product.getReviewCount(),
+                        product.getInStock(),
+                        product.getFeatures(),
+                        product.getVendorId()
+                );
+                productResponses.add(response);
+            }
+            return productResponses;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Getters and setters

@@ -4,7 +4,6 @@ import com.groupthree.shopsphere.dto.responses.ProductResponse;
 import com.groupthree.shopsphere.models.Product;
 import com.groupthree.shopsphere.repository.ProductRepository;
 
-import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,30 +50,44 @@ public class ProductController {
     }
 
     @GetMapping(value = {"/", ""})
-    public Iterable<ProductResponse> getProducts(
+    public ResponseEntity<Iterable<ProductResponse>> getProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search) {
         try {
+            Iterable<Product> products;
             if (category != null) {
-                return productToResponse(repo.findByCategoryIgnoreCase(category));
+                products = repo.findByCategoryIgnoreCase(category);
             } else if (search != null) {
-                return productToResponse(repo.findByNameContainingIgnoreCase(search));
+                products = repo.findByNameContainingIgnoreCase(search);
             } else {
-                return productToResponse(repo.findAll());
+                products = repo.findAll();
             }
+            
+            List<ProductResponse> response = productToResponse(products);
+            if (response.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singleton(new ProductResponse(
+                        "not_found",
+                        "No products found with given criteria"
+                    )));
+            }
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return Collections.singleton(new ProductResponse(
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Collections.singleton(new ProductResponse(
                     "error",
-                    e.getMessage()
-            ));
+                    "An error occurred while fetching products: " + e.getMessage()
+                )));
         }
     }
 
     @GetMapping(value = {"/{id}/", "/{id}"})
-    public ProductResponse getProduct(@PathVariable Long id) {
+    public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
         try {
-            Product product = repo.findById(id).orElseThrow();
-            return new ProductResponse(
+            Product product = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+            
+            ProductResponse response = new ProductResponse(
                     "success",
                     "Product obtained successfully",
                     product.getId(),
@@ -90,8 +103,16 @@ public class ProductController {
                     product.getFeatures(),
                     product.getVendorId()
             );
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return new ProductResponse("error", e.getMessage());
+            HttpStatus status = e.getMessage().contains("not found") ? 
+                HttpStatus.NOT_FOUND : HttpStatus.INTERNAL_SERVER_ERROR;
+            
+            return ResponseEntity.status(status)
+                .body(new ProductResponse(
+                    "error",
+                    e.getMessage()
+                ));
         }
     }
 }

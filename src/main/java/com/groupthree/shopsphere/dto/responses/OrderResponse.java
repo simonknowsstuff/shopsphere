@@ -1,10 +1,13 @@
 package com.groupthree.shopsphere.dto.responses;
 
+import com.groupthree.shopsphere.models.Order;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrderResponse {
     @NotNull
@@ -31,6 +34,23 @@ public class OrderResponse {
         this.orderDate = orderDate;
         this.totalAmount = totalAmount;
         this.orderStatus = orderStatus;
+    }
+
+    public static List<OrderResponse> getOrderResponses(Iterable<Order> orders) {
+        List<OrderResponse> orderResponses = new ArrayList<>();
+        for (Order order : orders) {
+            OrderResponse orderResponse = new OrderResponse(
+                    "success",
+                    "Order obtained successfully",
+                    order.getId(),
+                    order.getUserId(),
+                    order.getOrderDate(),
+                    order.getTotalAmount(),
+                    order.getStatus()
+            );
+            orderResponses.add(orderResponse);
+        }
+        return orderResponses;
     }
 
     // Getters and setters

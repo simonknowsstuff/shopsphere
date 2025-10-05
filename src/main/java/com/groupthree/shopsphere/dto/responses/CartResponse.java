@@ -1,7 +1,11 @@
 package com.groupthree.shopsphere.dto.responses;
 
+import com.groupthree.shopsphere.models.Cart;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CartResponse {
     @NotNull
@@ -26,6 +30,33 @@ public class CartResponse {
         this.userId = userId;
         this.productId = productId;
         this.quantity = quantity;
+    }
+
+    public static CartResponse fromCart(String message, Cart cart) {
+        return new CartResponse(
+                "success",
+                message,
+                cart.getId(),
+                cart.getUserId(),
+                cart.getProductId(),
+                cart.getQuantity()
+        );
+    }
+
+    public static List<CartResponse> getCartResponses(Iterable<Cart> carts) {
+        List<CartResponse> cartResponses = new ArrayList<>();
+        for (Cart cart : carts) {
+            CartResponse cartResponse = new CartResponse(
+                    "success",
+                    "Cart obtained successfully",
+                    cart.getId(),
+                    cart.getUserId(),
+                    cart.getProductId(),
+                    cart.getQuantity()
+            );
+            cartResponses.add(cartResponse);
+        }
+        return cartResponses;
     }
 
     // Getters and setters

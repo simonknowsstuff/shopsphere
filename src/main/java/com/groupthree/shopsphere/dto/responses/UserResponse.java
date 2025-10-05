@@ -1,8 +1,11 @@
 package com.groupthree.shopsphere.dto.responses;
 
+import com.groupthree.shopsphere.models.User;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class UserResponse {
@@ -29,6 +32,35 @@ public class UserResponse {
         this.lastName = lastName;
         this.email = email;
         this.role = role;
+    }
+
+    public static UserResponse fromUser(String message, User user) {
+        return new UserResponse(
+                "success",
+                message,
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole()
+        );
+    }
+
+    public static List<UserResponse> getUserResponses(Iterable<User> users) {
+        List<UserResponse> userResponses = new ArrayList<>();
+        for (User user : users) {
+            UserResponse userResponse = new UserResponse(
+                    "success",
+                    "User obtained successfully",
+                    user.getId(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getEmail(),
+                    user.getRole()
+            );
+            userResponses.add(userResponse);
+        }
+        return userResponses;
     }
 
     // Getters and setters

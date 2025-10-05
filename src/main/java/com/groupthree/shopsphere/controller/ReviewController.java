@@ -7,13 +7,17 @@ import com.groupthree.shopsphere.repository.ReviewRepository;
 
 import com.groupthree.shopsphere.repository.UserRepository;
 
-import org.springframework.data.relational.core.conversion.DbActionExecutionException;
+import jakarta.validation.Valid;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = {"/reviews/", "/reviews"})
@@ -49,33 +53,33 @@ public class ReviewController {
     }
 
     @GetMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public Iterable<Review> getReviews(@PathVariable Long productId) {
-        return repo.findByProductId(productId);
+    public ResponseEntity<Iterable<ReviewResponse>> getReviews(@PathVariable Long productId) {
+        try {
+            return ResponseEntity.ok(ReviewResponse.getReviewResponses(repo.findByProductId(productId)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singleton(new ReviewResponse(
+                    "error",
+                    e.getMessage()
+            )));
+        }
     }
 
     @PostMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public ReviewResponse addReview(@RequestBody Review review, @PathVariable Long productId) {
+    public ResponseEntity<ReviewResponse> addReview(@Valid @RequestBody Review review, @PathVariable Long productId) {
         try {
             Long userId = getUserIdFromToken();
             review.setUserId(userId);
             review.setProductId(productId);
             validateReview(review);
             repo.save(review);
-            return new ReviewResponse(
-                    "success",
-                    "Review added successfully",
-                    review.getId(),
-                    review.getUserId(),
-                    review.getProductId(),
-                    review.getReview()
-            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(ReviewResponse.fromReview(review, "Review added successfully"));
         } catch (Exception e) {
-            return new ReviewResponse("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @PutMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public ReviewResponse updateReview(@RequestBody Review review, @PathVariable Long productId) {
+    public ResponseEntity<ReviewResponse> updateReview(@Valid @RequestBody Review review, @PathVariable Long productId) {
         try {
             Long userId = getUserIdFromToken();
             Review existing = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
@@ -83,39 +87,40 @@ public class ReviewController {
             existing.setRating(review.getRating());
             validateReview(existing);
             repo.save(review);
-            return new ReviewResponse(
-                    "success",
-                    "Review updated successfully",
-                    existing.getId(),
-                    existing.getUserId(),
-                    existing.getProductId(),
-                    existing.getReview()
-            );
+            return ResponseEntity.ok(ReviewResponse.fromReview(existing, "Review updated successfully"));
         } catch (Exception e) {
-            return new ReviewResponse("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @DeleteMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public ReviewResponse deleteReview(@PathVariable Long productId) {
+    public ResponseEntity<ReviewResponse> deleteReview(@PathVariable Long productId) {
         try {
             Long userId = getUserIdFromToken();
             Review review = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
             repo.delete(review);
-            return new ReviewResponse("success", "Review deleted successfully");
+            return ResponseEntity.ok(new ReviewResponse("success", "Review deleted successfully"));
         } catch (Exception e) {
-            return new ReviewResponse("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @GetMapping(value = {"/user/{userId}/", "/user/{userId}"})
-    public Iterable<Review> getReviewsByUser(@PathVariable Long userId) {
-        return repo.findByUserId(userId);
+    public ResponseEntity<Iterable<ReviewResponse>> getReviewsByUser(@PathVariable Long userId) {
+        try {
+            return ResponseEntity.ok(ReviewResponse.getReviewResponses(repo.findByUserId(userId)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @GetMapping(value={"/user","/user/"})
-    public Iterable<Review> getOurReviews() {
-        Long userId = getUserIdFromToken();
-        return repo.findByUserId(userId);
+    public ResponseEntity<Iterable<ReviewResponse>> getOurReviews() {
+        try {
+            Long userId = getUserIdFromToken();
+            return ResponseEntity.ok(ReviewResponse.getReviewResponses(repo.findByUserId(userId)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

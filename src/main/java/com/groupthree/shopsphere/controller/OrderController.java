@@ -4,7 +4,6 @@ import com.groupthree.shopsphere.dto.responses.OrderResponse;
 import com.groupthree.shopsphere.models.*;
 import com.groupthree.shopsphere.repository.*;
 
-import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -44,7 +44,7 @@ public class OrderController {
     }
 
     @PostMapping(value = {"/", ""})
-    public OrderResponse createOrder() {
+    public ResponseEntity<OrderResponse> createOrder() {
         try {
             Long userId = getUserIdFromToken();
             List<Cart> cartItems = cartRepository.findByUserId(userId);
@@ -74,7 +74,7 @@ public class OrderController {
             }
             order.setTotalAmount(total);
             orderRepo.save(order);
-            return new OrderResponse(
+            return ResponseEntity.status(HttpStatus.CREATED).body(new OrderResponse(
                     "success",
                     "Order saved successfully",
                     order.getId(),
@@ -82,20 +82,33 @@ public class OrderController {
                     order.getOrderDate(),
                     order.getTotalAmount(),
                     order.getStatus()
-            );
+            ));
         } catch (Exception e) {
-            return new OrderResponse("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new OrderResponse("error", e.getMessage()));
         }
     }
 
     @GetMapping(value = {"/", ""})
-    public List<Order> getOrdersByUser() {
-        Long userId = getUserIdFromToken();
-        return orderRepo.findByUserId(userId);
+    public ResponseEntity<List<OrderResponse>> getOrdersByUser() {
+        try {
+            Long userId = getUserIdFromToken();
+            return ResponseEntity.ok(OrderResponse.getOrderResponses(orderRepo.findByUserId(userId)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonList(new OrderResponse(
+                    "error",
+                    e.getMessage()
+            )));
+        }
     }
 
     @GetMapping(value = {"/{orderId}/items/", "/{orderId}/items"})
-    public List<OrderItem> getOrderItems(@PathVariable Long orderId) {
-        return orderItemRepo.findByOrderId(orderId);
+    public ResponseEntity<List<OrderItem>> getOrderItems(@PathVariable Long orderId) {
+        try {
+            List<OrderItem> items = orderItemRepo.findByOrderId(orderId);
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

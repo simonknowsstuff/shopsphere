@@ -8,12 +8,15 @@ import com.groupthree.shopsphere.models.User;
 
 import jakarta.validation.Valid;
 
-import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = {"/vendor/", "/vendor"})
@@ -38,75 +41,62 @@ public class VendorController {
     }
 
     @GetMapping(value = {"/products/", "/products"})
-    public Iterable<Product> findById() {
-        Long vendorId = getVendorIdFromToken();
-        return productRepo.findByVendorId(vendorId);
+    public ResponseEntity<Iterable<ProductResponse>> findById() {
+        try {
+            Long vendorId = getVendorIdFromToken();
+            return ResponseEntity.ok(ProductResponse.getProductResponses(productRepo.findByVendorId(vendorId)));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @PostMapping(value = {"/add/", "/add"})
-    public ProductResponse addProduct(@Valid @RequestBody Product product) {
+    public ResponseEntity<ProductResponse> addProduct(@Valid @RequestBody Product product) {
         try {
             Long vendorId = getVendorIdFromToken();
             product.setVendorId(vendorId);
             productRepo.save(product);
-            return new ProductResponse(
-                    "success",
-                    "Product added successfully",
-                    product.getId(),
-                    product.getName(),
-                    product.getPrice(),
-                    product.getOriginalPrice(),
-                    product.getDescription(),
-                    product.getCategory(),
-                    product.getImage(),
-                    product.getRating(),
-                    product.getReviewCount(),
-                    product.getInStock(),
-                    product.getFeatures(),
-                    product.getVendorId()
-            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(ProductResponse.fromProduct(product, "Product added successfully"));
         } catch (Exception e) {
-            return new ProductResponse("error: ", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ProductResponse("error: ", e.getMessage()));
         }
     }
 
     @PutMapping(value = {"/products/{productId}/", "/products/{productId}"})
-    public ProductResponse updateProduct(@PathVariable Long productId, @Valid @RequestBody Product product) {
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long productId, @Valid @RequestBody Product product) {
         try {
             Long vendorId = getVendorIdFromToken();
-            Product prod = productRepo.findById(productId).orElseThrow();
-            if (!prod.getVendorId().equals(vendorId)) {
-                throw new RuntimeException();
+            Product existingProduct = productRepo.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+            
+            if (!existingProduct.getVendorId().equals(vendorId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized to update this product");
             }
-            prod.setPrice(product.getPrice());
-            prod.setCategory(product.getCategory());
-            prod.setRating(product.getRating());
-            prod.setInStock(product.getInStock());
-            prod.setReviewCount(product.getReviewCount());
-            productRepo.save(prod);
-            return new ProductResponse(
-                    "success",
-                    "Product updated successfully",
-                    prod.getId(),
-                    prod.getName(),
-                    prod.getPrice(),
-                    prod.getOriginalPrice(),
-                    prod.getDescription(),
-                    prod.getCategory(),
-                    prod.getImage(),
-                    prod.getRating(),
-                    prod.getReviewCount(),
-                    prod.getInStock(),
-                    prod.getFeatures(),
-                    prod.getVendorId()
-            );
+        
+            // Update all relevant fields
+            existingProduct.setName(product.getName());
+            existingProduct.setPrice(product.getPrice());
+            existingProduct.setOriginalPrice(product.getOriginalPrice());
+            existingProduct.setDescription(product.getDescription());
+            existingProduct.setCategory(product.getCategory());
+            existingProduct.setImage(product.getImage());
+            existingProduct.setRating(product.getRating());
+            existingProduct.setInStock(product.getInStock());
+            existingProduct.setReviewCount(product.getReviewCount());
+            existingProduct.setFeatures(product.getFeatures());
+        
+            Product savedProduct = productRepo.save(existingProduct);
+            return ResponseEntity.ok(ProductResponse.fromProduct(savedProduct, "Product updated successfully"));
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
-            return new ProductResponse("error", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update product");
         }
     }
     
     @DeleteMapping(value = {"/delete/{productId}/", "/delete/{productId}"})
-    public ProductResponse deleteProduct(@PathVariable Long productId) {
+    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long productId) {
         try {
             Long vendorId = getVendorIdFromToken();
             Product prod = productRepo.findById(productId).orElseThrow();
@@ -114,9 +104,10 @@ public class VendorController {
                 throw new RuntimeException();
             }
             productRepo.delete(prod);
+            return ResponseEntity.ok(new ProductResponse("success", "Product deleted successfully"));
         } catch (Exception e) {
-            return new ProductResponse("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ProductResponse("error", e.getMessage()));
         }
-        return new ProductResponse("success", "Product deleted successfully");
     }
 }
