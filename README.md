@@ -78,6 +78,10 @@ The application implements security best practices including:
 - Secure password handling
 - Role-based access control
 
+## Contributors
+- Simon Binu
+- Seraphin J Raphy
+
 ## Contributing
 
 This is a proof-of-concept project created for educational purposes. While it's not actively maintained for production use, feedback and suggestions are welcome.
@@ -88,5 +92,11 @@ This is a proof-of-concept project created for educational purposes. While it's 
 
 ## Acknowledgments
 
-This project was created as part of an Object-Oriented Programming class, demonstrating practical applications of OOP principles in a real-world scenario.
-```
+This project was developed as an educational initiative, putting Object-Oriented Programming principles into practice through a real-world e-commerce application. Special thanks to:
+
+- The Spring Boot team for their excellent documentation and framework
+- The Spring Framework community for their comprehensive guides and resources
+- The faculty and peers who provided valuable feedback and insights throughout the development process
+
+The project's architecture and implementation were guided by industry best practices and official Spring documentation.
+
