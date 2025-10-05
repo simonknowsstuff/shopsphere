@@ -162,16 +162,21 @@ public class AdminController {
     @DeleteMapping(value = {"/products/{productId}/", "/products/{productId}"})
     public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long productId) {
         try {
-            productRepo.deleteById(productId);
-            return ResponseEntity.ok(new ProductResponse("success", "Product deleted successfully"));
-        } catch (RuntimeException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ProductResponse("error", e.getMessage()));
-        }
+            Product product = productRepo.findById(productId).orElseThrow(
+                    () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+            // Delete all reviews associated with the product first:
+            List<Review> productReviews = reviewRepo.findByProductId(productId);
+            reviewRepo.deleteAll(productReviews);
+            // Then delete product:
+            productRepo.delete(product);
+        return ResponseEntity.ok(new ProductResponse("success", "Product and associated reviews deleted successfully"));
+    } catch (RuntimeException e) {
+        throw e;
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ProductResponse("error", e.getMessage()));
     }
+}
 
     // Orders
     @GetMapping(value = {"/orders/", "/orders"})
