@@ -42,7 +42,7 @@ public class CartController {
         }
     }
 
-    public Long getUserIdFromToken() {
+    private Long getUserIdFromToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userRepository.findByEmail(email);

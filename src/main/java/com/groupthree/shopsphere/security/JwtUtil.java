@@ -61,7 +61,7 @@ public class JwtUtil {
         }
     }
 
-    public String extractEmail(String token) {
+    public String extractSubject(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 

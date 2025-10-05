@@ -38,7 +38,7 @@ public class AuthController {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
-    public Long getUserIdFromToken() {
+    private Long getUserIdFromToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = repo.findByEmail(email);
@@ -163,7 +163,7 @@ public class AuthController {
                     .body(new AuthResponse("error", "Refresh token has been blacklisted"));
             }
 
-            String email = jwtUtil.extractEmail(refreshToken);
+            String email = jwtUtil.extractSubject(refreshToken);
             User user = repo.findByEmail(email);
 
             if (user == null) {

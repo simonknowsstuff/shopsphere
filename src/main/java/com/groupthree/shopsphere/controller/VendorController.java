@@ -37,7 +37,7 @@ public class VendorController {
         this.userRepository = userRepository;
     }
 
-    public Long getVendorIdFromToken() {
+    private Long getVendorIdFromToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userRepository.findByEmail(email);
