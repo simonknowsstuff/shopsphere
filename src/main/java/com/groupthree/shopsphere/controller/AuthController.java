@@ -78,7 +78,9 @@ public class AuthController {
                     return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(new AuthResponse("error", "Vendor already exists", existing.getRole(), null, null));
                 }
-                existing.getRole().add("VENDOR"); // Or just update the customer to vendor
+                Set<String> newRole=existing.getRole();
+                newRole.add("VENDOR");
+                existing.setRole(newRole);
                 repo.save(existing);
                 tokenBlacklistService.blacklistToken(token);
                 return ResponseEntity.ok(new AuthResponse("success", "Updated customer to vendor. Login again.", existing.getRole(), null, null));

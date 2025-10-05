@@ -39,7 +39,7 @@ public class Product {
     private boolean inStock;
     private String features;
 
-    @NotNull
+
     private Long vendorId;
 
     public Product() {}

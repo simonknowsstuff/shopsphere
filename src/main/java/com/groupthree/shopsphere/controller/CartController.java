@@ -93,6 +93,7 @@ public class CartController {
             Long userId = getUserIdFromToken();
             Cart existing = repo.findByUserIdAndProductId(userId, cart.getProductId()).orElseThrow();
             existing.setQuantity(cart.getQuantity());
+            repo.save(existing);
             return ResponseEntity.ok(CartResponse.fromCart("Cart quantity updated successfully", existing));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
