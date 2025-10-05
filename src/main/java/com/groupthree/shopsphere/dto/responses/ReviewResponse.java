@@ -17,6 +17,7 @@ public class ReviewResponse {
     private Long id;
     private Long userId;
     private Long productId;
+    private double rating;
     private String review;
 
     public ReviewResponse(String status, String message) {
@@ -24,12 +25,13 @@ public class ReviewResponse {
         this.message = message;
     }
 
-    public ReviewResponse(String status, String message, Long id, Long userId, Long productId, String review) {
+    public ReviewResponse(String status, String message, Long id, Long userId, Long productId, double rating, String review) {
         this.status = status;
         this.message = message;
         this.id = id;
         this.userId = userId;
         this.productId = productId;
+        this.rating = rating;
         this.review = review;
     }
 
@@ -40,6 +42,7 @@ public class ReviewResponse {
                 savedReview.getId(),
                 savedReview.getUserId(),
                 savedReview.getProductId(),
+                savedReview.getRating(),
                 savedReview.getReview()
         );
     }
@@ -53,6 +56,7 @@ public class ReviewResponse {
                     review.getId(),
                     review.getUserId(),
                     review.getProductId(),
+                    review.getRating(),
                     review.getReview()
             );
             reviewResponses.add(reviewResponse);
@@ -94,6 +98,13 @@ public class ReviewResponse {
     }
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+    public void setRating(double rating) {
+        this.rating = rating;
     }
 
     public String getReview() {

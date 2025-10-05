@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -346,14 +345,7 @@ public class AdminController {
         try {
             review.setUserId(userId);
             reviewRepo.save(review);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ReviewResponse(
-                    "success",
-                    "Review added successfully",
-                    review.getId(),
-                    review.getUserId(),
-                    review.getProductId(),
-                    review.getReview()
-            ));
+            return ResponseEntity.status(HttpStatus.CREATED).body(ReviewResponse.fromReview(review, "Review added successfully"));
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -370,14 +362,7 @@ public class AdminController {
             );
             review.setId(reviewId);
             reviewRepo.save(review);
-            return ResponseEntity.ok(new ReviewResponse(
-                    "success",
-                    "Review added successfully",
-                    review.getId(),
-                    review.getUserId(),
-                    review.getProductId(),
-                    review.getReview()
-            ));
+            return ResponseEntity.ok(ReviewResponse.fromReview(review, "Review updated successfully"));
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
