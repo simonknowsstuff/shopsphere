@@ -40,7 +40,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Restricting authority here:
-                .requestMatchers("/auth/**", "/products/**", "/h2-console/**", "/reviews/**","/error","/uploads/**").permitAll()
+                .requestMatchers("/auth/**", "/products/**", "/h2-console/**", "/reviews/**","/error","/uploads/**","/mockPay/**").permitAll()
                 .requestMatchers("/cart/**", "/orders/**", "/payment/**").hasAnyAuthority("CUSTOMER", "VENDOR", "ADMIN")
                 .requestMatchers("/vendor/**").hasAnyAuthority("VENDOR", "ADMIN")
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
