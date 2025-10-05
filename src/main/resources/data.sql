@@ -1,7 +1,7 @@
 -- Users
 INSERT INTO users (first_name, last_name, email, password, role) VALUES
 ('John', 'Doe', 'john@example.com', '$2a$10$hashedpassword1', 'CUSTOMER,VENDOR'),
-('Alice', 'Smith', 'alice@example.com', '$2a$10$hashedpassword2', 'CUSTOMER'),
+('Jack', 'Doe', 'jackdoe@email.com', '$2a$10$cpERZJnIlPZRoAVnEXy.geRD9bLlBGE6yRyzSE16I479EMe726pOu', 'CUSTOMER,VENDOR,ADMIN'),
 ('Vendor', 'One', 'vendor1@example.com', '$2a$10$hashedpassword3', 'CUSTOMER,VENDOR');
 
 -- Products

@@ -41,7 +41,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Restricting authority here:
                 .requestMatchers("/auth/**", "/products/**", "/h2-console/**", "/reviews/**","/error","/uploads/**").permitAll()
-                .requestMatchers("/cart/**", "/orders/**").hasAnyAuthority("CUSTOMER", "VENDOR", "ADMIN")
+                .requestMatchers("/cart/**", "/orders/**", "/payment/**").hasAnyAuthority("CUSTOMER", "VENDOR", "ADMIN")
                 .requestMatchers("/vendor/**").hasAnyAuthority("VENDOR", "ADMIN")
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
