@@ -68,13 +68,23 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> addReview(@Valid @RequestBody Review review, @PathVariable Long productId) {
         try {
             Long userId = getUserIdFromToken();
+            // Check if user already has a review for this product
+            if (repo.findByUserIdAndProductId(userId, productId).isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ReviewResponse("error", "Product already reviewed"));
+            }
             review.setUserId(userId);
             review.setProductId(productId);
             validateReview(review);
             repo.save(review);
-            return ResponseEntity.status(HttpStatus.CREATED).body(ReviewResponse.fromReview(review, "Review added successfully"));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ReviewResponse.fromReview(review, "Review added successfully"));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                .body(new ReviewResponse("error", e.getReason()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ReviewResponse("error", e.getMessage()));
         }
     }
 
@@ -82,14 +92,22 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> updateReview(@Valid @RequestBody Review review, @PathVariable Long productId) {
         try {
             Long userId = getUserIdFromToken();
-            Review existing = repo.findByUserIdAndProductId(userId, productId).orElseThrow();
+            Review existing = repo.findByUserIdAndProductId(userId, productId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, 
+                    "Review not found. Create a review first using POST."
+                ));
             existing.setReview(review.getReview());
             existing.setRating(review.getRating());
             validateReview(existing);
-            repo.save(review);
+            repo.save(existing);
             return ResponseEntity.ok(ReviewResponse.fromReview(existing, "Review updated successfully"));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                .body(new ReviewResponse("error", e.getReason()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ReviewResponse("error", e.getMessage()));
         }
     }
 
@@ -101,7 +119,9 @@ public class ReviewController {
             repo.delete(review);
             return ResponseEntity.ok(new ReviewResponse("success", "Review deleted successfully"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new ReviewResponse("error", e.getMessage())
+            );
         }
     }
 
@@ -110,7 +130,9 @@ public class ReviewController {
         try {
             return ResponseEntity.ok(ReviewResponse.getReviewResponses(repo.findByUserId(userId)));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Collections.singleton(new ReviewResponse("error", e.getMessage()))
+            );
         }
     }
 
@@ -120,7 +142,9 @@ public class ReviewController {
             Long userId = getUserIdFromToken();
             return ResponseEntity.ok(ReviewResponse.getReviewResponses(repo.findByUserId(userId)));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Collections.singleton(new ReviewResponse("error", e.getMessage()))
+            );
         }
     }
 }
