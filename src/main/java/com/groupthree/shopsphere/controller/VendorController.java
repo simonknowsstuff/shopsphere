@@ -15,8 +15,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping(value = {"/vendor/", "/vendor"})
@@ -62,6 +70,31 @@ public class VendorController {
                 .body(new ProductResponse("error: ", e.getMessage()));
         }
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "No file provided"));
+            }
+
+            // Save to static folder
+            String uploadsDir = new File("uploads").getAbsolutePath(); // adjust to your static folder
+            File dir = new File(uploadsDir);
+            if (!dir.exists()) dir.mkdirs();
+
+            String filename = System.currentTimeMillis() + "_" + Paths.get(file.getOriginalFilename()).getFileName();
+            File dest = new File(dir, filename);
+            file.transferTo(dest);
+
+            // Return filename (frontend can prepend /uploads/ if needed)
+            return ResponseEntity.ok(Map.of("filename", filename));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
 
     @PutMapping(value = {"/products/{productId}/", "/products/{productId}"})
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long productId, @Valid @RequestBody Product product) {
