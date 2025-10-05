@@ -23,17 +23,6 @@ public class AuthResponse {
         this.refreshToken = refreshToken;
     }
 
-    public AuthResponse(String status, String message, Set<String> role, String accessToken, String refreshToken, String email, String firstName, String lastName) {
-        this.message = message;
-        this.status = status;
-        this.role = role;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-
     // Getters and setters
     public String getMessage() {
         return message;
