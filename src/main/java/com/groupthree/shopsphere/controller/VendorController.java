@@ -2,7 +2,9 @@ package com.groupthree.shopsphere.controller;
 
 import com.groupthree.shopsphere.dto.responses.ProductResponse;
 import com.groupthree.shopsphere.models.Product;
+import com.groupthree.shopsphere.models.Review;
 import com.groupthree.shopsphere.repository.ProductRepository;
+import com.groupthree.shopsphere.repository.ReviewRepository;
 import com.groupthree.shopsphere.repository.UserRepository;
 import com.groupthree.shopsphere.models.User;
 
@@ -23,6 +25,7 @@ import org.springframework.http.HttpStatus;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 
@@ -31,10 +34,12 @@ import java.util.Map;
 public class VendorController {
     private final ProductRepository productRepo;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepo;
 
-    public VendorController(ProductRepository productRepo, UserRepository userRepository) {
+    public VendorController(ProductRepository productRepo, UserRepository userRepository, ReviewRepository reviewRepo) {
         this.productRepo = productRepo;
         this.userRepository = userRepository;
+        this.reviewRepo = reviewRepo;
     }
 
     private Long getVendorIdFromToken() {
@@ -132,12 +137,26 @@ public class VendorController {
     public ResponseEntity<ProductResponse> deleteProduct(@PathVariable Long productId) {
         try {
             Long vendorId = getVendorIdFromToken();
-            Product prod = productRepo.findById(productId).orElseThrow();
-            if (!prod.getVendorId().equals(vendorId)) {
-                throw new RuntimeException();
+            Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Product not found"));
+            if (!product.getVendorId().equals(vendorId)) {
+                throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Not authorized to delete this product");
             }
-            productRepo.delete(prod);
-            return ResponseEntity.ok(new ProductResponse("success", "Product deleted successfully"));
+            // Delete all reviews associated with the product
+            List<Review> productReviews = reviewRepo.findByProductId(productId);
+            reviewRepo.deleteAll(productReviews);
+            // Delete the product
+            productRepo.delete(product);
+        
+            return ResponseEntity.ok(new ProductResponse(
+                "success", 
+                "Product and associated reviews deleted successfully"));
+            
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                .body(new ProductResponse("error", e.getReason()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ProductResponse("error", e.getMessage()));
